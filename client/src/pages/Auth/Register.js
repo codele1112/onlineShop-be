@@ -1,8 +1,9 @@
 import axios from "axios";
 import { React, useState } from "react";
 import Layout from "../../components/Layout/Layout";
-import { toast } from "react-toastify";
+
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -25,9 +26,9 @@ const Register = () => {
           address,
         }
       );
-      if (res.data.success) {
-        toast.success(res.data.message);
-        navigate("login");
+      if (res && res.data.success) {
+        toast.success(res.data && res.data.message);
+        navigate("/login");
       } else {
         toast.error(res.data.message);
       }
@@ -39,7 +40,7 @@ const Register = () => {
 
   return (
     <Layout title={"Register - Soap & Candle"}>
-      <div className="register">
+      <div className="form-container">
         <h1>Register Page</h1>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
