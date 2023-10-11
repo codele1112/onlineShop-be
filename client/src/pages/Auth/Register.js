@@ -3,7 +3,8 @@ import { React, useState } from "react";
 import Layout from "../../components/Layout/Layout";
 
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -27,7 +28,16 @@ const Register = () => {
         }
       );
       if (res && res.data.success) {
-        toast.success(res.data && res.data.message);
+        toast("🦄 Wow so easy!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
         navigate("/login");
       } else {
         toast.error(res.data.message);

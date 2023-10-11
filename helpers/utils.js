@@ -8,15 +8,8 @@ utilsHelper.sendResponse = (res, status, success, data, errors, message) => {
   if (data) response.data = data;
   if (errors) response.errors = errors;
   if (message) response.message = message;
-  return res.status(status).json(response);
-};
 
-utilsHelper.generateRandomHexString = (len) => {
-  return crypto
-    .randomBytes(Math.ceil(len / 2))
-    .toString("hex") // convert to hexadecimal format
-    .slice(0, len)
-    .toUpperCase(); // return required number of characters
+  return res.status(status).json(response);
 };
 
 // Error handling
@@ -36,4 +29,5 @@ class AppError extends Error {
 }
 
 utilsHelper.AppError = AppError;
+
 module.exports = utilsHelper;
