@@ -31,7 +31,9 @@ const productSchema = Schema(
     },
     image: { type: String, default: "" },
     shipping: { type: Boolean },
+    isDeleted: { type: Boolean, default: false },
   },
+
   { timestamps: true }
 );
 

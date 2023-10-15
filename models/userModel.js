@@ -32,6 +32,18 @@ const userSchema = Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    cart: [
+      {
+        item: {
+          type: mongoose.Schema.ObjectId,
+          ref: "Product",
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
 
     createdAt: {
       type: Date,

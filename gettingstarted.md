@@ -37,8 +37,8 @@ CRUD
 
 ### Category
 
-admin CRUD
-USER : filter search by category
+<!-- admin CRUD
+USER : filter search by category -->
 
 ### Reviews
 
@@ -49,8 +49,8 @@ USER : filter search by category
 
 ### Rating
 
-- As a user, I can rate my product I bought.
-- As a user, I can edit rate my product I bought.
+<!-- - As a user, I can rate my product I bought.
+- As a user, I can edit rate my product I bought. -->
 
 ## Endpoint APIs
 
@@ -88,30 +88,26 @@ USER : filter search by category
 
 ### Products APIs
 
-- @rout GET /posts/user.:userId?page=1&limit=10
-- @description get all posts a user can see with pagination
+- @rout GET /products/user.:userId?page=1&limit=10
+- @description get all products a user can see with pagination
 - @access Login required
 
-- @rout POST /posts
-- @description create a new post
+- @rout POST /pproducts
+- @description create a new product
 - @body (content, image)
-- @access Login required
+- @access Login required - admin
 
-- @rout PUT /posts/:id
-- @description update a post
+- @rout PUT /products/:id
+- @description update a product
 - @body (content, image)
-- @access Login required
+- @access Login required -admin
 
 - @rout DELETE /posts/:id
-- @description Delete a post
-- @access Login required
+- @description Delete a product
+- @access Login required -admin
 
-- @rout GET /posts/:id
-- @description Get a single post
-- @access Login required
-
-- @rout GET /posts/:id/comments
-- @description Get comments of a post
+- @rout GET /products/:id
+- @description Get a single product
 - @access Login required
 
 ### Review APIs
@@ -134,8 +130,3 @@ USER : filter search by category
 - @access Login required
 
 ### Rating APIs
-
-- @rout POST /reactions
-- @description save a raction for post or comment
-- @body {targetType: 'Post' or 'Comment', targetId, emoji: 'like' or 'dislike' }
-- @access Login required

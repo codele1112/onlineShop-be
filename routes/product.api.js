@@ -6,6 +6,8 @@ const productController = require("../controllers/product.controller");
 const { body, param } = require("express-validator");
 const validators = require("../middlewares/validators");
 const authentication = require("../middlewares/authentication");
+const uploadCloud = require("../middlewares/upload");
+
 /**
  * @rout POST /products
  * @description create a new product
@@ -14,18 +16,17 @@ const authentication = require("../middlewares/authentication");
  */
 router.post(
   "/",
-  // validators.validate([
-  //   body("name", "Invalid name").exists().notEmpty().isString(),
-  //   body("description", "Invalid description").exists().notEmpty().isString(),
-  //   body("price", "Invalid price").exists().notEmpty(),
-  //   body("category", "Invalid category").exists().notEmpty(),
-  //   body("quantity", "Invalid quantity").exists().notEmpty(),
-  //   body("photo", "Invalid photo").exists().notEmpty(),
-  // ]),
+  validators.validate([
+    body("name", "Invalid name").exists().notEmpty().isString(),
+    body("description", "Invalid description").exists().notEmpty().isString(),
+    body("price", "Invalid price").exists().notEmpty(),
+    body("category", "Invalid category").exists().notEmpty(),
+    body("quantity", "Invalid quantity").exists().notEmpty(),
+  ]),
 
   authentication.loginRequired,
   authentication.isAdmin,
-  // formidableMiddleware(),
+  uploadCloud.array("image"),
   productController.createNewProduct
 );
 

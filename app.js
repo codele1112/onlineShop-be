@@ -10,8 +10,6 @@ const db = require("./config/db");
 
 var indexRouter = require("./routes/index");
 
-const cloudinary = require("./cloudinary/cloudinary");
-
 var app = express();
 // connect to db
 db.connect();
