@@ -1,12 +1,11 @@
 const express = require("express");
-const formidableMiddleware = require("express-formidable");
 const router = express.Router();
 const productController = require("../controllers/product.controller");
 
 const { body, param } = require("express-validator");
 const validators = require("../middlewares/validators");
 const authentication = require("../middlewares/authentication");
-const uploadCloud = require("../middlewares/upload");
+const uploader = require("../config/cloudinary.config");
 
 /**
  * @rout POST /products
@@ -26,7 +25,6 @@ router.post(
 
   authentication.loginRequired,
   authentication.isAdmin,
-  uploadCloud.array("image"),
   productController.createNewProduct
 );
 
@@ -35,7 +33,7 @@ router.post(
  * @description get all products with pagination
  * @access Public
  */
-router.get("/", authentication.loginRequired, productController.getAllProducts);
+router.get("/", productController.getAllProducts);
 
 /**
  * @rout GET /products/:id
@@ -53,17 +51,41 @@ router.get(
 );
 
 /**
- * @rout PUT /products/:id
+ * @rout PUT /products/ratings
+ * @description Rating a single product by id
+ * @access Login required
+ */
+router.put(
+  "/ratings",
+  authentication.loginRequired,
+  productController.ratingProduct
+);
+
+/**
+ * @rout PUT /products/uploadimage/:id
+ *
+ * @description Upload images for a product by product id
+ * @access Login required,Admin
+ */
+router.put(
+  "/uploadimage/:pid",
+  authentication.loginRequired,
+  authentication.isAdmin,
+
+  productController.uploadImagesProduct
+);
+/**
+ * @rout PUT /products/:productId
  * @description Update a single product by id
  * @body (name, image,description, price, ratings, stock, numberOfReviews)
  * @access Private - Admin
  */
 router.put(
-  "/:id",
+  "/:pid",
   authentication.loginRequired,
   authentication.isAdmin,
   validators.validate([
-    param("id").exists().isString().custom(validators.checkObjectId),
+    param("pid").exists().isString().custom(validators.checkObjectId),
   ]),
   productController.updateProduct
 );
@@ -74,12 +96,13 @@ router.put(
  * @access Private - Admin
  */
 router.delete(
-  "/:id",
+  "/:pid",
   authentication.loginRequired,
   authentication.isAdmin,
   validators.validate([
-    param("id").exists().isString().custom(validators.checkObjectId),
+    param("pid").exists().isString().custom(validators.checkObjectId),
   ]),
   productController.deleteProduct
 );
+
 module.exports = router;

@@ -1,37 +1,27 @@
 const bcrypt = require("bcryptjs");
 const { catchAsync, AppError, sendResponse } = require("../helpers/utils");
-const User = require("../models/userModel");
+const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+const { cookie } = require("express-validator");
 
 const userController = {};
 
 userController.register = catchAsync(async (req, res, next) => {
   // Get data from request
-  let { name, email, password, phone, address, role } = req.body;
-
+  let { name, email, password, role, phone } = req.body;
   // Validation
   let user = await User.findOne({ email });
   if (user)
     throw new AppError(400, "User already existed!", "Registration error");
   // Process
-  const salt = await bcrypt.genSalt(10);
-  password = await bcrypt.hash(password, salt);
-  user = await User.create({ name, email, password, phone, address, role });
-
-  const accessToken = await user.generateToken();
+  const newUser = await User.create(req.body);
+  await newUser.save();
   //Response
-  sendResponse(
-    res,
-    200,
-    true,
-    { user, accessToken },
-    null,
-    "Create user Successful"
-  );
+  sendResponse(res, 200, true, { newUser }, null, "Create user Successful");
 });
 
 userController.getAllUsers = catchAsync(async (req, res, next) => {
   // Get data
-  const currentUserId = req.userId;
 
   let { page, limit, ...filter } = { ...req.query };
   // Validation
@@ -73,10 +63,10 @@ userController.getAllUsers = catchAsync(async (req, res, next) => {
 
 userController.getCurrentUser = catchAsync(async (req, res, next) => {
   // get data
-  const currentUserId = req.userId;
+  const currentId = req.userId;
 
   // validation
-  const user = await User.findById(currentUserId);
+  const user = await User.findById(currentId);
   if (!user)
     throw new AppError(401, "User Not Found", "Get Current User Error!");
 

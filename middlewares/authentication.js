@@ -1,18 +1,22 @@
 const jwt = require("jsonwebtoken");
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 const { AppError, catchAsync } = require("../helpers/utils");
-const User = require("../models/userModel");
+const User = require("../models/user");
 
 authentication = {};
 authentication.loginRequired = (req, res, next) => {
   try {
+    // headers: {authorization: Bearer token}
     const tokenString = req.headers.authorization;
+    console.log("tokenString", tokenString);
+
     if (!tokenString)
       throw new AppError(401, "Login Required", "Authentication Error");
 
+    // console.log("tokenString", tokenString);
     const token = tokenString.replace("Bearer ", "");
+    // console.log("token", token);
 
-    console.log(token);
     jwt.verify(token, JWT_SECRET_KEY, (err, payload) => {
       if (err) {
         if (err.name === "TokenExpriredError") {
@@ -21,6 +25,7 @@ authentication.loginRequired = (req, res, next) => {
           throw new AppError(401, "Token is invalid", "Authentication Error");
         }
       }
+      console.log("payload", payload);
 
       req.userId = payload._id;
     });

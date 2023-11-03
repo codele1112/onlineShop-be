@@ -49,7 +49,7 @@ router.get(
 router.get("/me", authentication.loginRequired, userController.getCurrentUser);
 
 /**
- * @rout GET /users/:userId
+ * @rout GET /users/me
  * @description Get user profile by ID
  * @access Login required
  */
