@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const productController = require("../controllers/product.controller");
+const uploader = require("../config/cloudinary.config");
 
 const { body, param } = require("express-validator");
 const validators = require("../middlewares/validators");
 const authentication = require("../middlewares/authentication");
-const uploader = require("../config/cloudinary.config");
 
 /**
  * @rout POST /products
@@ -43,7 +43,6 @@ router.get("/", productController.getAllProducts);
  */
 router.get(
   "/:id",
-  authentication.loginRequired,
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
   ]),
@@ -71,8 +70,8 @@ router.put(
   "/uploadimage/:pid",
   authentication.loginRequired,
   authentication.isAdmin,
-
-  productController.uploadImagesProduct
+  uploader.array("images", 10),
+  productController.uploadProductImages
 );
 /**
  * @rout PUT /products/:productId

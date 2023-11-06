@@ -29,8 +29,7 @@ const userSchema = Schema(
     wishlist: { type: mongoose.Types.ObjectId, ref: "Product" },
     cart: { type: Array, default: [] },
     isBlocked: { type: Boolean, default: false },
-    refeshToken: { type: String },
-
+    refreshToken: { type: String },
     passwordChangedAt: { type: String },
     passwordResetToken: { type: String },
     passwordResetExpires: { type: String },
@@ -59,11 +58,11 @@ userSchema.methods = {
   },
   createPasswordChangedToken: function () {
     const resetToken = crypto.randomBytes(32).toString("hex");
-    this.passwordResetToken = crypto
-      .createHash("sha256")
-      .update(resetToken)
-      .digest("hex");
+    console.log("resetToken", resetToken);
+    this.passwordResetToken = resetToken;
     this.passwordResetExpires = Date.now() + 15 * 60 * 1000;
+    console.log(resetToken);
+    console.log(this.passwordResetToken);
     return resetToken;
   },
 };

@@ -50,6 +50,13 @@ router.get("/me", authentication.loginRequired, userController.getCurrentUser);
 
 /**
  * @rout GET /users/me
+ * @description Get current user profile
+ * @access Login required
+ */
+
+router.post("/refreshtoken", userController.refreshAccessToken);
+/**
+ * @rout GET /users/me
  * @description Get user profile by ID
  * @access Login required
  */

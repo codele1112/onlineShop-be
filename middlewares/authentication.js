@@ -5,19 +5,13 @@ const User = require("../models/user");
 
 authentication = {};
 authentication.loginRequired = (req, res, next) => {
-  try {
-    // headers: {authorization: Bearer token}
-    const tokenString = req.headers.authorization;
-    console.log("tokenString", tokenString);
+  // headers: {authorization: Bearer token}
 
-    if (!tokenString)
-      throw new AppError(401, "Login Required", "Authentication Error");
-
-    // console.log("tokenString", tokenString);
-    const token = tokenString.replace("Bearer ", "");
+  if (req?.headers?.authorization?.startsWith("Bearer")) {
+    const token = req.headers.authorization.split(" ")[1];
     // console.log("token", token);
 
-    jwt.verify(token, JWT_SECRET_KEY, (err, payload) => {
+    jwt.verify(token, JWT_SECRET_KEY, (err, decode) => {
       if (err) {
         if (err.name === "TokenExpriredError") {
           throw new AppError(401, "Token Exprired", "Authentication Error");
@@ -25,21 +19,21 @@ authentication.loginRequired = (req, res, next) => {
           throw new AppError(401, "Token is invalid", "Authentication Error");
         }
       }
-      console.log("payload", payload);
+      console.log("decode", decode);
 
-      req.userId = payload._id;
+      req.user = decode;
+
+      next();
     });
-
-    next();
-  } catch (error) {
-    next(error);
+  } else {
+    throw new AppError(401, "Token required.", "Authentication Error");
   }
 };
 
 authentication.isAdmin = catchAsync(async (req, res, next) => {
-  const currentUserId = req.userId;
+  const { _id } = req.user;
   // console.log(currentUserId);
-  const adminUser = await User.findById(currentUserId);
+  const adminUser = await User.findById(_id);
   if (adminUser.role !== "admin") {
     throw new AppError("UnAuthorized Access");
   } else {

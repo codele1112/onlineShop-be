@@ -221,7 +221,7 @@ productController.ratingProduct = catchAsync(async (req, res, next) => {
   );
 });
 
-productController.uploadImagesProduct = catchAsync(async (req, res, next) => {
+productController.uploadProductImages = catchAsync(async (req, res, next) => {
   const { pid } = req.params;
   if (!req.files)
     throw new AppError(401, "Missing Inputs", "Upload Product Images Error");

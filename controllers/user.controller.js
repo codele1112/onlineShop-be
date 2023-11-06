@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const { catchAsync, AppError, sendResponse } = require("../helpers/utils");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-const { cookie } = require("express-validator");
+const generateAccessToken = require("../middlewares/jwt");
 
 const userController = {};
 
@@ -63,10 +63,11 @@ userController.getAllUsers = catchAsync(async (req, res, next) => {
 
 userController.getCurrentUser = catchAsync(async (req, res, next) => {
   // get data
-  const currentId = req.userId;
+  const { _id } = req.user;
+  // console.log(_id);
 
   // validation
-  const user = await User.findById(currentId);
+  const user = await User.findById(_id).select("-refreshToken -role -password");
   if (!user)
     throw new AppError(401, "User Not Found", "Get Current User Error!");
 
@@ -82,23 +83,68 @@ userController.getCurrentUser = catchAsync(async (req, res, next) => {
   );
 });
 
+userController.refreshAccessToken = catchAsync(async (req, res, next) => {
+  // get data
+  const cookie = req.cookies;
+  // console.log(cookie.refreshToken);
+  let newAccessToken;
+  if (!cookie && !cookie.refreshToken)
+    throw new AppError(
+      401,
+      "No refresh token in cookie ",
+      "Refresh Token Error"
+    );
+  // check token
+  jwt.verify(
+    cookie.refreshToken,
+    process.env.JWT_SECRET_KEY,
+    async (err, decode) => {
+      // console.log("decode", decode);
+      if (err)
+        throw new AppError(401, "Invalid refesh token", "Refresh Token Error");
+
+      // compare with token in db
+      const response = await User.findOne({
+        _id: decode._id,
+        refreshToken: cookie.refreshToken,
+      });
+      // console.log("response", response);
+      if (response)
+        newAccessToken = generateAccessToken(response._id, response.role);
+      console.log(newAccessToken);
+      // await response.save();
+      return sendResponse(
+        res,
+        200,
+        true,
+        { newAccessToken },
+        null,
+        "Get refresh token Successful"
+      );
+    }
+  );
+});
+
 userController.getSingleUser = catchAsync(async (req, res, next) => {
   // get data
-  const userId = req.params.userId;
+  const uid = req.params.userId;
+  console.log("uid", uid);
+
   // process
-  const user = await User.findById(userId);
+  const user = await User.findById(uid);
   if (!user) throw new AppError(400, "User Not Found", "Get Single User Error");
 
-  // response
+  // // response
   return sendResponse(res, 200, true, user, null, "Get Single User Successful");
 });
 
 userController.updateUser = catchAsync(async (req, res, next) => {
   // Get data from request
-  const currentUserId = req.userId;
+  const { _id } = req.user;
+  console.log(_id);
   const targetUserId = req.params.userId;
   // Validation
-  if (currentUserId !== targetUserId)
+  if (_id !== targetUserId)
     throw new AppError(400, "Permission Required", "Update User Error");
   let user = await User.findById(targetUserId);
   if (!user) throw new AppError(400, "User Not Found", "Update User Error");

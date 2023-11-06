@@ -58,5 +58,5 @@ router.get("/forgotpassword", authController.forgotPassword);
  * @access Public
  */
 
-router.put("/resetpassword", authController.resetPassword);
+router.get("/reset-password/:token", authController.resetPassword);
 module.exports = router;
