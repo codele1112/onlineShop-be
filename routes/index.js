@@ -30,6 +30,10 @@ router.use("/blogcategories", blogCategoryApi);
 const blogApi = require("./blog.api");
 router.use("/blogs", blogApi);
 
+// couponApi
+const couponApi = require("./coupon.api");
+router.use("/coupon", couponApi);
+
 // orderApi
 const orderApi = require("./order.api");
 router.use("/orders", orderApi);

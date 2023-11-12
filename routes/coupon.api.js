@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const productCategoryController = require("../controllers/productCategory.controller");
+const couponController = require("../controllers/coupon.controller");
 
 const authentication = require("../middlewares/authentication");
 const validators = require("../middlewares/validators");
 const { param } = require("express-validator");
 /**
- * @rout POST /category
- * @description create new category
- * @body (name)
+ * @rout POST /coupon
+ * @description create new coupon
+ * @body (name, dicount,expire)
  * @access Login required, Admin
  */
 
@@ -16,7 +16,11 @@ router.post(
   "/",
   authentication.loginRequired,
   authentication.isAdmin,
-  productCategoryController.createCategory
+  // validators.validate([
+  //   body("name", "Invalid name").exists().notEmpty(),
+  //   body("dicount", "Invalid discount").exists().isNumber(),
+  // ]),
+  couponController.createCoupon
 );
 
 /**
@@ -25,7 +29,7 @@ router.post(
  * @access Public
  */
 
-router.get("/", productCategoryController.getCategories);
+router.get("/", couponController.getCoupons);
 
 /**
  * @rout PUT /category
@@ -34,14 +38,12 @@ router.get("/", productCategoryController.getCategories);
  */
 
 router.put(
-  "/:pcid",
+  "/:cid",
 
   authentication.loginRequired,
   authentication.isAdmin,
-  validators.validate([
-    param("pcid").exists().custom(validators.checkObjectId),
-  ]),
-  productCategoryController.updateCategory
+  validators.validate([param("cid").exists().custom(validators.checkObjectId)]),
+  couponController.updateCoupon
 );
 
 /**
@@ -51,13 +53,11 @@ router.put(
  */
 
 router.delete(
-  "/:pcid",
+  "/:cid",
   authentication.loginRequired,
   authentication.isAdmin,
-  validators.validate([
-    param("pcid").exists().custom(validators.checkObjectId),
-  ]),
-  productCategoryController.deleteCategory
+  validators.validate([param("cid").exists().custom(validators.checkObjectId)]),
+  couponController.deleteCoupon
 );
 
 module.exports = router;

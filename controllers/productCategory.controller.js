@@ -16,7 +16,7 @@ productCategoryController.createCategory = catchAsync(
   }
 );
 
-productCategoryController.getCategory = catchAsync(async (req, res, next) => {
+productCategoryController.getCategories = catchAsync(async (req, res, next) => {
   const category = await Category.find().select("name _id");
   return sendResponse(
     res,
@@ -30,9 +30,9 @@ productCategoryController.getCategory = catchAsync(async (req, res, next) => {
 
 productCategoryController.updateCategory = catchAsync(
   async (req, res, next) => {
-    const { cId } = req.params;
+    const { cpid } = req.params;
 
-    const category = await Category.findByIdAndUpdate(cId, req.body, {
+    const category = await Category.findByIdAndUpdate(pcid, req.body, {
       new: true,
     });
     return sendResponse(
@@ -47,9 +47,9 @@ productCategoryController.updateCategory = catchAsync(
 );
 productCategoryController.deleteCategory = catchAsync(
   async (req, res, next) => {
-    const { cId } = req.params;
+    const { pcid } = req.params;
 
-    const category = await Category.findByIdAndDelete(cId);
+    const category = await Category.findByIdAndDelete(pcid);
 
     return sendResponse(
       res,

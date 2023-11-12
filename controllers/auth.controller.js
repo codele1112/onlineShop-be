@@ -25,7 +25,7 @@ authController.loginWithEmail = catchAsync(async (req, res, next) => {
     // create tokens
     const accessToken = generateAccessToken(response._id, role);
     const refreshToken = generateRefreshToken(response._id);
-    // console.log("refreshToken", refreshToken);
+    console.log("refreshToken", refreshToken);
 
     // save refresh token in db
     await User.findByIdAndUpdate(response._id, { refreshToken }, { new: true });

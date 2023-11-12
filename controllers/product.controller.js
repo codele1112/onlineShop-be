@@ -52,6 +52,12 @@ productController.getAllProducts = catchAsync(async (req, res, next) => {
   // Filtering
   if (queries?.name)
     formatedQueries.name = { $regex: queries.name, $options: "i" };
+
+  if (queries?.category)
+    formatedQueries.category = {
+      $regex: queries.category,
+      $options: "i",
+    };
   let queryCommand = Product.find(formatedQueries);
 
   //Sorting
@@ -116,15 +122,15 @@ productController.getSingleProduct = catchAsync(async (req, res, next) => {
 
 productController.updateProduct = catchAsync(async (req, res, next) => {
   // Get data from request
-  const pId = req.params.id;
+  const { pid } = req.params;
   if (req.body && req.body.name) req.body.slug = slugify(req.body.name);
   // Validation
-  let product = await Product.findById(pId);
+  let product = await Product.findById(pid);
   if (!product)
     throw new AppError(400, "Product Not Found", "Update Product Error");
 
   // Process
-  product = await Product.findByIdAndUpdate(pId, req.body, { new: true });
+  product = await Product.findByIdAndUpdate(pid, req.body, { new: true });
   //Response
   return sendResponse(
     res,

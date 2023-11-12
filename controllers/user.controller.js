@@ -1,8 +1,10 @@
 const bcrypt = require("bcryptjs");
 const { catchAsync, AppError, sendResponse } = require("../helpers/utils");
 const User = require("../models/user");
+const Product = require("../models/product");
 const jwt = require("jsonwebtoken");
 const generateAccessToken = require("../middlewares/jwt");
+const mongoose = require("mongoose");
 
 const userController = {};
 
@@ -62,16 +64,19 @@ userController.getAllUsers = catchAsync(async (req, res, next) => {
 });
 
 userController.getCurrentUser = catchAsync(async (req, res, next) => {
-  // get data
   const { _id } = req.user;
-  // console.log(_id);
 
-  // validation
-  const user = await User.findById(_id).select("-refreshToken -role -password");
+  const user = await User.findById(_id)
+    .select("-refreshToken -password")
+    .populate({
+      path: "cart",
+      populate: {
+        path: "product",
+        select: "name images price",
+      },
+    });
   if (!user)
     throw new AppError(401, "User Not Found", "Get Current User Error!");
-
-  // response
 
   return sendResponse(
     res,
@@ -136,6 +141,114 @@ userController.getSingleUser = catchAsync(async (req, res, next) => {
 
   // // response
   return sendResponse(res, 200, true, user, null, "Get Single User Successful");
+});
+
+userController.updateCart = catchAsync(async (req, res, next) => {
+  // get data
+  const { _id } = req.user;
+  const { pid, quantity } = req.body;
+
+  console.log({ pid, quantity });
+  // process
+  const user = await User.findById(_id);
+  console.log("user", user);
+
+  if (!user) throw new AppError(400, "User Not Found", "Update Cart Error");
+  const alreadyProduct = user?.cart?.find(
+    (el) => el.product._id.toString() === pid
+  );
+  const product = await Product.findById(pid);
+  if (!product)
+    throw new AppError(400, "Product not found", "Update Cart Error");
+  const { price } = product;
+  console.log("alreadyProduct", alreadyProduct);
+
+  if (alreadyProduct) {
+    const response = await User.updateOne(
+      { cart: { $elemMatch: alreadyProduct } },
+      { $set: { "cart.$.quantity": quantity, "cart.$.price": price } },
+      { new: true }
+    );
+
+    const newCart = (await User.findById(_id).select("cart")).cart;
+    console.log("newCart", newCart);
+    return sendResponse(
+      res,
+      200,
+      true,
+      newCart,
+      null,
+      "Updated Cart Successfully"
+    );
+  } else {
+    const response = await User.findByIdAndUpdate(
+      _id,
+      {
+        $push: { cart: { product: pid, quantity, price } },
+      },
+      { new: true }
+    );
+    const newCart = (await User.findById(_id).select("cart")).cart;
+    return sendResponse(
+      res,
+      200,
+      true,
+      newCart,
+      null,
+      "Updated Cart Successfully"
+    );
+  }
+});
+
+userController.removeProductInCart = catchAsync(async (req, res, next) => {
+  // get data
+  const { _id } = req.user;
+  const { pid } = req.params;
+
+  console.log("pid", pid);
+
+  // process
+  const user = await User.findById(_id).select("cart");
+  if (!user) throw new AppError(400, "User Not Found", "Update Cart Error");
+  const currentCart = user.cart;
+
+  console.log("user.cart", user.cart);
+
+  // console.log("user.cart.product", user.cart[0].product.toString());
+  const alreadyProduct = user?.cart?.find(
+    (el) => el.product?.toString() === pid
+  );
+
+  console.log("alreadyProduct", alreadyProduct);
+
+  if (!alreadyProduct) {
+    throw new AppError(
+      400,
+      "Product Not Found In Cart",
+      "Remove Product In Cart Error"
+    );
+  }
+  const filterCart = currentCart.filter((item) => {
+    console.log("item", item["product"]._id.toString());
+    return item["product"]._id.toString() !== pid;
+  });
+  console.log("filterCart", filterCart);
+
+  const response = await User.findByIdAndUpdate(
+    _id,
+    {
+      cart: filterCart,
+    },
+    { new: true }
+  );
+  return sendResponse(
+    res,
+    200,
+    true,
+    response,
+    null,
+    "Remove Product in Cart Successfully"
+  );
 });
 
 userController.updateUser = catchAsync(async (req, res, next) => {

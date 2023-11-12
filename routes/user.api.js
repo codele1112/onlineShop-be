@@ -49,14 +49,13 @@ router.get(
 router.get("/me", authentication.loginRequired, userController.getCurrentUser);
 
 /**
- * @rout GET /users/me
- * @description Get current user profile
- * @access Login required
+ * @rout GET /users/refreshtoken
+ * @description
  */
 
 router.post("/refreshtoken", userController.refreshAccessToken);
 /**
- * @rout GET /users/me
+ * @rout GET /users/refreshtoken
  * @description Get user profile by ID
  * @access Login required
  */
@@ -65,12 +64,29 @@ router.get(
   "/:userId",
   authentication.loginRequired,
   validators.validate([
-    param("userId", "Invalid userId")
-      .exists()
-      .isString()
-      .custom(validators.checkObjectId),
+    param("userId", "Invalid userId").exists().custom(validators.checkObjectId),
   ]),
   userController.getSingleUser
+);
+
+/**
+ * @rout PUT /users/cart
+ * @description Update cart
+ * @access Login required
+ */
+
+router.put("/cart", authentication.loginRequired, userController.updateCart);
+
+/**
+ * @rout DELETE /users/remove-cart
+ * @description Update cart
+ * @access Login required
+ */
+
+router.delete(
+  "/remove-cart/:pid",
+  authentication.loginRequired,
+  userController.removeProductInCart
 );
 
 /**

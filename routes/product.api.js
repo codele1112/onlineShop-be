@@ -81,11 +81,9 @@ router.put(
  */
 router.put(
   "/:pid",
-  authentication.loginRequired,
-  authentication.isAdmin,
-  validators.validate([
-    param("pid").exists().isString().custom(validators.checkObjectId),
-  ]),
+  // authentication.loginRequired,
+  // authentication.isAdmin,
+  validators.validate([param("pid").exists().custom(validators.checkObjectId)]),
   productController.updateProduct
 );
 

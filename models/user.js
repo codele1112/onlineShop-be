@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
+const { type } = require("os");
 
 const userSchema = Schema(
   {
@@ -27,7 +28,13 @@ const userSchema = Schema(
     phone: { type: String, default: "" },
     address: { type: mongoose.Types.ObjectId, ref: "Address" },
     wishlist: { type: mongoose.Types.ObjectId, ref: "Product" },
-    cart: { type: Array, default: [] },
+    cart: [
+      {
+        product: { type: mongoose.Types.ObjectId, ref: "Product" },
+        quantity: Number,
+        price: Number,
+      },
+    ],
     isBlocked: { type: Boolean, default: false },
     refreshToken: { type: String },
     passwordChangedAt: { type: String },
@@ -54,6 +61,8 @@ userSchema.pre("save", async function (next) {
 
 userSchema.methods = {
   isCorrectPassword: async function (password) {
+    console.log("iscorrectpw", password, this.password);
+
     return await bcrypt.compare(password, this.password);
   },
   createPasswordChangedToken: function () {
