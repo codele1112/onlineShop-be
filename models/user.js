@@ -26,7 +26,7 @@ const userSchema = Schema(
       default: "user",
     },
     phone: { type: String, default: "" },
-    address: { type: mongoose.Types.ObjectId, ref: "Address" },
+    address: String,
     wishlist: { type: mongoose.Types.ObjectId, ref: "Product" },
     cart: [
       {

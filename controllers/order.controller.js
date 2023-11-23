@@ -4,25 +4,26 @@ const Order = require("../models/order");
 
 const orderController = {};
 orderController.createOrder = catchAsync(async (req, res, next) => {
-  const currentUserId = req.userId;
-  const userCart = await User.findById(currentUserId)
-    .select("cart")
-    .populate("cart.product", "name price");
-  const products = userCart?.cart?.map((el) => ({
-    product: el.product._id,
-    quantity: el.quantity,
-  }));
-  let total = userCart?.cart?.reduce(
-    (sum, el) => el.product.price * el.quantity + sum,
-    0
-  );
-  const order = await Order.create({ products, total, orderBy: currentUserId });
+  const { _id } = req.user;
+  const { products, total, address, status } = req.body;
+
+  if (address) {
+    await User.findByIdAndUpdate(
+      _id,
+      { address, status: "Succeed", cart: [] },
+      { new: true }
+    );
+  }
+
+  const data = { products, total, orderBy: _id };
+  if (status) data.status = status;
+  const order = await Order.create(data);
   return sendResponse(res, 200, true, order, null, "Create order Successful");
 });
 
 orderController.getUserOrder = catchAsync(async (req, res, next) => {
-  const currentUserId = req.userId;
-  const order = await Order.find({ orderBy: currentUserId });
+  const { _id } = req.user;
+  const order = await Order.find({ orderBy: _id });
   return sendResponse(
     res,
     200,

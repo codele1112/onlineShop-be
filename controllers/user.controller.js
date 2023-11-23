@@ -30,7 +30,7 @@ userController.getAllUsers = catchAsync(async (req, res, next) => {
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 10;
 
-  const filterConditions = [{ isDeleted: false }];
+  const filterConditions = [];
 
   if (filter.name) {
     filterConditions.push({
@@ -53,6 +53,7 @@ userController.getAllUsers = catchAsync(async (req, res, next) => {
     .limit(limit);
   // Response
 
+  console.log("users", users);
   sendResponse(
     res,
     200,

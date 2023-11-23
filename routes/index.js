@@ -36,6 +36,6 @@ router.use("/coupon", couponApi);
 
 // orderApi
 const orderApi = require("./order.api");
-router.use("/orders", orderApi);
+router.use("/order", orderApi);
 
 module.exports = router;

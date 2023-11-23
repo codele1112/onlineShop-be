@@ -8,22 +8,18 @@ const orderShema = Schema({
         type: mongoose.Schema.ObjectId,
         ref: "Product",
       },
-      quantity: {
-        type: Number,
-        required: true,
-      },
+      quantity: Number,
+      price: Number,
+      name: String,
     },
   ],
   status: {
     type: String,
-    default: "Processing",
-    enum: ["Cancelled", "Processing", "Success"],
+    default: "Cancelled",
+    enum: ["Cancelled", "Succeed"],
   },
-  total: { type: Number },
+  total: Number,
   orderBy: { type: mongoose.Types.ObjectId, ref: "User" },
-  paymentIntent: {
-    type: String,
-  },
 });
 
 const Order = mongoose.model("Order", orderShema);

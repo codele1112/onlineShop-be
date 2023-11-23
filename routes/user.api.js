@@ -75,7 +75,7 @@ router.get(
  * @access Login required
  */
 
-router.put("/cart", authentication.loginRequired, userController.updateCart);
+router.put("/cart", userController.updateCart);
 
 /**
  * @rout DELETE /users/remove-cart

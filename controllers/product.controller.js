@@ -36,7 +36,6 @@ productController.createNewProduct = catchAsync(async (req, res, next) => {
 // Filtering, Sorting & Pagination
 productController.getAllProducts = catchAsync(async (req, res, next) => {
   // Get data from request
-  const currentUserId = req.userId;
 
   let queries = { ...req.query };
   const excludeFields = ["limit", "sort", "page", "fields"];
