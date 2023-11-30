@@ -49,6 +49,28 @@ router.get(
 router.get("/me", authentication.loginRequired, userController.getCurrentUser);
 
 /**
+ * @rout PUT /users/me
+ * @description Update user's profile
+ * @access Login required
+ */
+
+router.put("/me", authentication.loginRequired, userController.updateUser);
+
+/**
+ * @rout PUT /users/:userId
+ * @description Update user's profile by admin
+ * @access Login required
+ */
+router.delete(
+  "/:uid",
+  authentication.loginRequired,
+  authentication.isAdmin,
+  validators.validate([
+    param("uid", "Invalid userId").exists().custom(validators.checkObjectId),
+  ]),
+  userController.deleteUser
+);
+/**
  * @rout GET /users/refreshtoken
  * @description
  */
@@ -91,20 +113,17 @@ router.delete(
 
 /**
  * @rout PUT /users/:userId
- * @description Update user's profile by userId
+ * @description Update user's profile by admin
  * @access Login required
  */
-
 router.put(
-  "/:userId",
+  "/:uid",
   authentication.loginRequired,
+  authentication.isAdmin,
   validators.validate([
-    param("userId", "Invalid userId")
-      .exists()
-      .isString()
-      .custom(validators.checkObjectId),
+    param("uid", "Invalid userId").exists().custom(validators.checkObjectId),
   ]),
-  userController.updateUser
+  userController.updateUserByAdmin
 );
 
 module.exports = router;

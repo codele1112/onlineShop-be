@@ -23,35 +23,59 @@ userController.register = catchAsync(async (req, res, next) => {
 });
 
 userController.getAllUsers = catchAsync(async (req, res, next) => {
-  // Get data
+  let queries = { ...req.query };
+  const excludeFields = ["limit", "sort", "page", "fields"];
+  excludeFields.forEach((el) => delete queries[el]);
 
-  let { page, limit, ...filter } = { ...req.query };
-  // Validation
-  page = parseInt(page) || 1;
-  limit = parseInt(limit) || 10;
+  let queryString = JSON.stringify(queries);
+  queryString = queryString.replace(
+    /\b(gte|gt|lt|lte)\b/g,
+    (macthedEl) => `$${macthedEl}`
+  );
+  const formatedQueries = JSON.parse(queryString);
 
-  const filterConditions = [];
+  // Filtering
+  if (queries?.name)
+    formatedQueries.name = { $regex: queries.name, $options: "i" };
 
-  if (filter.name) {
-    filterConditions.push({
-      name: { $regex: filter.name, $options: "i" },
-    });
+  if (req.query.q) {
+    delete formatedQueries.q;
+    formatedQueries["$or"] = [
+      { name: { $regex: req.query.q, $options: "i" } },
+      { email: { $regex: req.query.q, $options: "i" } },
+    ];
   }
 
-  const filterCriteria = filterConditions.length
-    ? { $and: filterConditions }
-    : {};
+  console.log("formatQueries", formatedQueries);
+  let queryCommand = User.find(formatedQueries);
 
-  const count = await User.countDocuments(filterCriteria);
+  //Sorting
+
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(",").join(" ");
+    queryCommand = queryCommand.sort(sortBy);
+  }
+
+  // Fields limiting
+
+  if (req.query.fields) {
+    const fields = req.query.fields.split(",").join(" ");
+    queryCommand = queryCommand.select(fields);
+  }
+
+  // Pagination
+
+  let page = parseInt(req.query.page) || 1;
+  let limit = parseInt(req.query.limit) || 10;
+
+  const count = await User.countDocuments(queryCommand);
   const totalPages = Math.ceil(count / limit);
   const offset = limit * (page - 1);
 
-  // Process
-  let users = await User.find(filterCriteria)
+  let users = await User.find(queryCommand)
     .sort({ createdAt: -1 })
     .skip(offset)
     .limit(limit);
-  // Response
 
   console.log("users", users);
   sendResponse(
@@ -253,27 +277,35 @@ userController.removeProductInCart = catchAsync(async (req, res, next) => {
 });
 
 userController.updateUser = catchAsync(async (req, res, next) => {
-  // Get data from request
   const { _id } = req.user;
-  console.log(_id);
-  const targetUserId = req.params.userId;
-  // Validation
-  if (_id !== targetUserId)
-    throw new AppError(400, "Permission Required", "Update User Error");
-  let user = await User.findById(targetUserId);
-  if (!user) throw new AppError(400, "User Not Found", "Update User Error");
 
-  // Process
-  const allows = ["name", "phone", "address", "city", "country", "avatarUrl"];
+  if (!_id || Object.keys(req.body).length === 0)
+    throw new AppError(400, "Missing Inputs", "Update User Error");
+  let user = await User.findByIdAndUpdate(_id, req.body, { new: true });
 
-  allows.forEach((field) => {
-    if (req.body[field] !== undefined) {
-      user[field] = req.body[field];
-    }
-  });
-  await user.save();
-  //Response
-  return sendResponse(res, 200, true, user, null, "Update user Successful");
+  return sendResponse(res, 200, true, user, null, "Updated user Successfully");
+});
+
+userController.updateUserByAdmin = catchAsync(async (req, res, next) => {
+  const { uid } = req.params;
+  console.log("uid", uid);
+
+  if (Object.keys(req.body).length === 0)
+    throw new AppError(400, "Missing Inputs", "Update User Error");
+
+  let user = await User.findByIdAndUpdate(uid, req.body, { new: true }).select(
+    "-password -role -refreshToken"
+  );
+
+  return sendResponse(res, 200, true, user, null, "Updated");
+});
+userController.deleteUser = catchAsync(async (req, res, next) => {
+  const { uid } = req.params;
+  // console.log("uid", uid);
+
+  let user = await User.findByIdAndDelete(uid);
+
+  return sendResponse(res, 200, true, user, null, "Deleted user Successfully!");
 });
 
 module.exports = userController;
