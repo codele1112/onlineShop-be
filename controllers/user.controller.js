@@ -4,22 +4,69 @@ const User = require("../models/user");
 const Product = require("../models/product");
 const jwt = require("jsonwebtoken");
 const generateAccessToken = require("../middlewares/jwt");
-const mongoose = require("mongoose");
+const sendMail = require("../helpers/sendMail");
+var uniqid = require("uniqid");
 
 const userController = {};
 
 userController.register = catchAsync(async (req, res, next) => {
-  // Get data from request
   let { name, email, password, role, phone } = req.body;
-  // Validation
   let user = await User.findOne({ email });
   if (user)
     throw new AppError(400, "User already existed!", "Registration error");
-  // Process
-  const newUser = await User.create(req.body);
+
+  const token = uniqid();
+
+  res.cookie(
+    "dataRegister",
+    { ...req.body, token },
+    {
+      httpOnly: true,
+      maxAge: 5 * 60 * 1000,
+    }
+  );
+
+  const html = `Please confirm your email address by clicking the link below to complete the registration.
+  This link will expire within 5 minutes from now. 
+  <a href=${process.env.URL_SERVER}/api/auth/final-registration/${token}>Click here!</a>`;
+
+  const data = {
+    email,
+    html,
+    subject: "REGISTRATION COMPLETED",
+  };
+
+  const rs = await sendMail(data);
+  return sendResponse(
+    res,
+    200,
+    true,
+    rs,
+    null,
+    "Please check your email to active account."
+  );
+
+  // sendResponse(res, 200, true, { newUser }, null, "Create user Successful");
+});
+
+userController.finalRegister = catchAsync(async (req, res, next) => {
+  const cookie = req.cookies;
+  const { token } = req.params;
+  if (!cookie || cookie?.dataRegister?.token !== token)
+    return res.redirect(`${process.env.CLIENT_URL}/final-registration/failed`);
+
+  const newUser = await User.create({
+    email: cookie.dataRegister.email,
+    password: cookie.dataRegister.password,
+    name: cookie.dataRegister.name,
+    phone: cookie.dataRegister.phone,
+  });
   await newUser.save();
-  //Response
-  sendResponse(res, 200, true, { newUser }, null, "Create user Successful");
+
+  if (newUser) {
+    return res.redirect(`${process.env.CLIENT_URL}/final-registration/success`);
+  } else
+    return res.redirect(`${process.env.CLIENT_URL}/final-registration/failed`);
 });
 
 userController.getAllUsers = catchAsync(async (req, res, next) => {

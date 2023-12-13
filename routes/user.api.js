@@ -27,6 +27,14 @@ router.post(
 );
 
 /**
+ * @rout GET /users/final-registration
+ * @description final register a new account
+ * @access Public
+ */
+
+router.get("/final-registration/:token", userController.finalRegister);
+
+/**
  * @rout GET /users
  * @description Get all users.
  * @access Login required

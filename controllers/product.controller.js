@@ -2,26 +2,30 @@ const { catchAsync, AppError, sendResponse } = require("../helpers/utils");
 const fs = require("fs");
 const slugify = require("slugify");
 const Product = require("../models/product");
+const productCategory = require("../models/productCategory");
 
 const productController = {};
 
 productController.createNewProduct = catchAsync(async (req, res, next) => {
-  const { name, description, price, category, quantity } = req.body;
+  let { name, description, category, price, quantity } = req.body;
+  const productCat = await productCategory.find({ name: category });
+
+  // console.log("productCat", productCat[0]._id);
+
+  category = productCat[0]._id;
+  req.body.category = category;
+  // console.log("category", category);
+  const thumb = req?.files?.thumb[0].path;
+  const images = req?.files?.images.map((el) => el.path);
+  if (thumb) req.body.thumb = thumb;
+  if (images) req.body.images = images;
 
   let product = await Product.findOne({ name });
+
   if (product)
     throw new AppError(400, "Product already existed!", "Create Product Error");
-  let slug = slugify(req.body.name);
-  product = await Product.create({
-    name,
-    description,
-    price,
-    category,
-    quantity,
-    slug,
-  });
-
-  // await calculatePostCount(currentUserId);
+  req.body.slug = slugify(name);
+  product = await Product.create(req.body);
 
   return sendResponse(
     res,
@@ -35,8 +39,6 @@ productController.createNewProduct = catchAsync(async (req, res, next) => {
 
 // Filtering, Sorting & Pagination
 productController.getAllProducts = catchAsync(async (req, res, next) => {
-  // Get data from request
-
   let queries = { ...req.query };
   const excludeFields = ["limit", "sort", "page", "fields"];
   excludeFields.forEach((el) => delete queries[el]);
@@ -49,6 +51,7 @@ productController.getAllProducts = catchAsync(async (req, res, next) => {
   const formatedQueries = JSON.parse(queryString);
 
   // Filtering
+
   if (queries?.name)
     formatedQueries.name = { $regex: queries.name, $options: "i" };
 
@@ -57,17 +60,32 @@ productController.getAllProducts = catchAsync(async (req, res, next) => {
       $regex: queries.category,
       $options: "i",
     };
-  let queryCommand = Product.find(formatedQueries);
+
+  let queryObject = {};
+  if (queries?.q) {
+    queryObject = {
+      $or: [
+        { name: { $regex: queries.q, $options: "i" } },
+        {
+          category: {
+            $regex: queries.q,
+            $options: "i",
+          },
+        },
+      ],
+    };
+  }
+
+  const q = { ...formatedQueries, ...queryObject };
+  let queryCommand = Product.find(q);
 
   //Sorting
-
   if (req.query.sort) {
     const sortBy = req.query.sort.split(",").join(" ");
     queryCommand = queryCommand.sort(sortBy);
   }
 
   // Fields limiting
-
   if (req.query.fields) {
     const fields = req.query.fields.split(",").join(" ");
     queryCommand = queryCommand.select(fields);

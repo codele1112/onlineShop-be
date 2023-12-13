@@ -35,7 +35,7 @@ const productSchema = Schema(
     },
     sold: { type: Number, default: 0 },
     images: { type: Array },
-    thumb: { type: String, required: true },
+    thumb: { type: String },
     ratings: [
       {
         star: { type: Number },

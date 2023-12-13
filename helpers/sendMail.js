@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 const { catchAsync } = require("./utils");
 
-const sendMail = async ({ email, html }) => {
+const sendMail = async ({ email, html, subject }) => {
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
@@ -18,7 +18,7 @@ const sendMail = async ({ email, html }) => {
   const info = await transporter.sendMail({
     from: '"SOACAN" <no-reply@soap&candle@gmail.com>', // sender address
     to: email, // list of receivers
-    subject: "FORGOT PASSWORD", // Subject line
+    subject: subject, // Subject line
     html: html, // html body
   });
 

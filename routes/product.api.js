@@ -10,17 +10,21 @@ const authentication = require("../middlewares/authentication");
 /**
  * @rout POST /products
  * @description create a new product
- * @body { name, description, price, category, quantity, image }
+ * @body { name, description, price, category, quantity, images }
  * @access Private - Admin
  */
 router.post(
   "/",
-  validators.validate([
-    body("name", "Invalid name").exists().notEmpty().isString(),
-    body("description", "Invalid description").exists().notEmpty().isString(),
-    body("price", "Invalid price").exists().notEmpty(),
-    body("category", "Invalid category").exists().notEmpty(),
-    body("quantity", "Invalid quantity").exists().notEmpty(),
+  // validators.validate([
+  //   body("name", "Invalid name").exists().notEmpty(),
+  //   body("description", "Invalid description").exists().notEmpty(),
+  //   body("price", "Invalid price").exists().notEmpty(),
+  //   body("category", "Invalid category").exists().notEmpty(),
+  //   body("quantity", "Invalid quantity").exists().notEmpty(),
+  // ]),
+  uploader.fields([
+    { name: "images", maxCount: 10 },
+    { name: "thumb", maxCount: 1 },
   ]),
 
   authentication.loginRequired,

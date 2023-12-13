@@ -14,22 +14,16 @@ const authController = {};
 // refresh token => cap moi access token
 
 authController.loginWithEmail = catchAsync(async (req, res, next) => {
-  // Get data from request
   const { email, password } = req.body;
-
-  // Validation
   const response = await User.findOne({ email });
-  // console.log("res", response);
   if (response && (await response.isCorrectPassword(password))) {
     const { password, role, ...userData } = response.toObject();
     // create tokens
     const accessToken = generateAccessToken(response._id, role);
     const refreshToken = generateRefreshToken(response._id);
     console.log("refreshToken", refreshToken);
-
     // save refresh token in db
     await User.findByIdAndUpdate(response._id, { refreshToken }, { new: true });
-
     // save refresh token in cookie
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
@@ -76,11 +70,12 @@ authController.logout = catchAsync(async (req, res, next) => {
 authController.forgotPassword = catchAsync(async (req, res, next) => {
   // kiem tra email user co duoc truyen len ko?
   const { email } = req.query;
+  if (!email) throw new AppError(204, "Missing email", "Forgot Password Error");
   // kiem tra email co trong he thong ko
   const user = await User.findOne({ email });
-  if (!user) throw new AppError(401, "User not found", "Forgot Password Error");
+  if (!user) throw new AppError(401, "User Not Found", "Forgot Password Error");
 
-  // tao , random
+  // tao , random resetToken
   const resetToken = user.createPasswordChangedToken();
   await user.save();
 
@@ -92,6 +87,7 @@ authController.forgotPassword = catchAsync(async (req, res, next) => {
   const data = {
     email,
     html,
+    subject: "FORGOT PASSWORD",
   };
 
   const rs = await sendMail(data);
@@ -102,7 +98,7 @@ authController.forgotPassword = catchAsync(async (req, res, next) => {
 authController.resetPassword = catchAsync(async (req, res, next) => {
   // kiem tra pw cu
   const { token } = req.params;
-  console.log("token", token);
+  // console.log("token", token);
   // const passwordResetToken = crypto
   //   .createHash("sha256")
   //   .update(token)
@@ -113,7 +109,7 @@ authController.resetPassword = catchAsync(async (req, res, next) => {
     passwordResetToken: token,
     passwordResetExpires: { $gt: Date.now() },
   });
-  console.log("user", user);
+  // console.log("user", user);
   if (!user) throw new AppError(500, "Invalid reset token");
   const email = user.email;
 
@@ -136,14 +132,7 @@ authController.resetPassword = catchAsync(async (req, res, next) => {
 
   const rs = await sendMail(data);
 
-  return sendResponse(
-    res,
-    200,
-    true,
-    user,
-    null,
-    "Update password sucessfully"
-  );
+  return sendResponse(res, 200, true, user, null, "Reset password sucessfully");
 });
 
 module.exports = authController;

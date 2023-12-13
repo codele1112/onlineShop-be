@@ -39,6 +39,7 @@ const userSchema = Schema(
     passwordChangedAt: { type: String },
     passwordResetToken: { type: String },
     passwordResetExpires: { type: String },
+    registerToken: { type: String },
   },
   { timestamps: true }
 );
@@ -60,17 +61,18 @@ userSchema.pre("save", async function (next) {
 
 userSchema.methods = {
   isCorrectPassword: async function (password) {
-    console.log("iscorrectpw", password, this.password);
+    // console.log("iscorrectpw", password, this.password);
 
     return await bcrypt.compare(password, this.password);
   },
+
   createPasswordChangedToken: function () {
     const resetToken = crypto.randomBytes(32).toString("hex");
-    console.log("resetToken", resetToken);
+    // console.log("resetToken", resetToken);
     this.passwordResetToken = resetToken;
-    this.passwordResetExpires = Date.now() + 15 * 60 * 1000;
-    console.log(resetToken);
-    console.log(this.passwordResetToken);
+    this.passwordResetExpires = Date.now() + 5 * 60 * 1000;
+    // console.log(resetToken);
+    // console.log(this.passwordResetToken);
     return resetToken;
   },
 };
