@@ -44,12 +44,12 @@ router.get(
 );
 
 /**
- * @rout GET /auth/forgotpassword
+ * @rout POST /auth/forgotpassword
  * @query email
  * @access Public
  */
 
-router.get("/forgotpassword", authController.forgotPassword);
+router.post("/forgot-password", authController.forgotPassword);
 
 /**
  * @rout PUT /auth/resetpassword
@@ -58,5 +58,5 @@ router.get("/forgotpassword", authController.forgotPassword);
  * @access Public
  */
 
-router.get("/reset-password/:token", authController.resetPassword);
+router.put("/reset-password", authController.resetPassword);
 module.exports = router;

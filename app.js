@@ -22,6 +22,7 @@ app.use(
   cors({
     origin: process.env.CLIENT_URL,
     methods: ["POST", "PUT", "GET", "DELETE"],
+    credentials: true,
   })
 );
 app.use(express.static(path.join(__dirname, "public")));

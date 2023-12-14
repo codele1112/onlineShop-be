@@ -69,7 +69,7 @@ authController.logout = catchAsync(async (req, res, next) => {
 
 authController.forgotPassword = catchAsync(async (req, res, next) => {
   // kiem tra email user co duoc truyen len ko?
-  const { email } = req.query;
+  const { email } = req.body;
   if (!email) throw new AppError(204, "Missing email", "Forgot Password Error");
   // kiem tra email co trong he thong ko
   const user = await User.findOne({ email });
@@ -82,7 +82,7 @@ authController.forgotPassword = catchAsync(async (req, res, next) => {
   // gui pw moi qua mail
   const html = `Please confirm your email address by clicking the link below to change your password.
   This link will expire within 5 minutes from now. 
-  <a href=${process.env.URL_SERVER}/api/auth/reset-password/${resetToken}>Click here!</a>`;
+  <a href=${process.env.CLIENT_URL}/reset-password/${resetToken}>Click here!</a>`;
 
   const data = {
     email,
@@ -97,12 +97,12 @@ authController.forgotPassword = catchAsync(async (req, res, next) => {
 
 authController.resetPassword = catchAsync(async (req, res, next) => {
   // kiem tra pw cu
-  const { token } = req.params;
+  const { password, token } = req.body;
   // console.log("token", token);
-  // const passwordResetToken = crypto
-  //   .createHash("sha256")
-  //   .update(token)
-  //   .digest("hex");
+  const passwordResetToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
 
   // kiem tra user id
   const user = await User.findOne({
@@ -111,26 +111,27 @@ authController.resetPassword = catchAsync(async (req, res, next) => {
   });
   // console.log("user", user);
   if (!user) throw new AppError(500, "Invalid reset token");
-  const email = user.email;
+  // const email = user.email;
 
   // cap nhat pw moi
   // tao pw moi
-  const newPassword = crypto.randomString(8);
+  // const newPassword = crypto.randomString(8);
+  user.password = password;
   user.passwordResetToken = undefined;
   user.passwordChangedAt = Date.now();
   user.passwordResetExpires = undefined;
-  user.password = newPassword;
+  // user.password = newPassword;
   await user.save();
 
   // gui pw moi qua mail
-  const html = `This is new password ${newPassword}`;
+  // const html = `This is new password ${newPassword}`;
 
-  const data = {
-    email,
-    html,
-  };
+  // const data = {
+  //   email,
+  //   html,
+  // };
 
-  const rs = await sendMail(data);
+  // const rs = await sendMail(data);
 
   return sendResponse(res, 200, true, user, null, "Reset password sucessfully");
 });
