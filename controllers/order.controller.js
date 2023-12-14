@@ -35,7 +35,7 @@ orderController.getUserOrder = catchAsync(async (req, res, next) => {
 });
 
 orderController.getOrders = catchAsync(async (req, res, next) => {
-  const currentUserId = req.userId;
+  // const currentUserId = req.userId;
   const order = await Order.find();
   return sendResponse(res, 200, true, order, null, "Get all orders Successful");
 });
