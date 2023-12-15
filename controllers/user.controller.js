@@ -328,10 +328,13 @@ userController.removeProductInCart = catchAsync(async (req, res, next) => {
 
 userController.updateUser = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
+  const { name, email, phone, address, avatar } = req.body;
+  const data = { name, email, phone, address, avatar };
 
+  if (req.file) data.avatar = req.file.path;
   if (!_id || Object.keys(req.body).length === 0)
     throw new AppError(400, "Missing Inputs", "Update User Error");
-  let user = await User.findByIdAndUpdate(_id, req.body, { new: true });
+  let user = await User.findByIdAndUpdate(_id, data, { new: true });
 
   return sendResponse(res, 200, true, user, null, "Updated user Successfully");
 });

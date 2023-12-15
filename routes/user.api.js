@@ -5,6 +5,7 @@ const userController = require("../controllers/user.controller");
 const { body, param } = require("express-validator");
 const validators = require("../middlewares/validators");
 const authentication = require("../middlewares/authentication");
+const uploader = require("../config/cloudinary.config");
 
 /**
  * @rout POST /users/register
@@ -62,7 +63,12 @@ router.get("/me", authentication.loginRequired, userController.getCurrentUser);
  * @access Login required
  */
 
-router.put("/me", authentication.loginRequired, userController.updateUser);
+router.put(
+  "/me",
+  authentication.loginRequired,
+  uploader.single("avatar"),
+  userController.updateUser
+);
 
 /**
  * @rout PUT /users/:userId
