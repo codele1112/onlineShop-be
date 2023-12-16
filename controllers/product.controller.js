@@ -55,11 +55,13 @@ productController.getAllProducts = catchAsync(async (req, res, next) => {
   if (queries?.name)
     formatedQueries.name = { $regex: queries.name, $options: "i" };
 
-  if (queries?.category)
-    formatedQueries.category = {
-      $regex: queries.category,
-      $options: "i",
-    };
+  if (queries?.category) {
+    const productCat = await productCategory.find({ name: queries?.category });
+    category = productCat[0]._id;
+    queries.category = category;
+    // console.log("queries.category", queries.category);
+    formatedQueries.category = category;
+  }
 
   let queryObject = {};
   if (queries?.q) {
@@ -75,6 +77,7 @@ productController.getAllProducts = catchAsync(async (req, res, next) => {
       ],
     };
   }
+  console.log("formatedQueries", formatedQueries, queryObject);
 
   const q = { ...formatedQueries, ...queryObject };
   let queryCommand = Product.find(q);
@@ -99,7 +102,7 @@ productController.getAllProducts = catchAsync(async (req, res, next) => {
   const count = await Product.countDocuments(queryCommand);
   const totalPages = Math.ceil(count / limit);
   const offset = limit * (page - 1);
-
+  // console.log("queryCommand", queryCommand);
   let products = await Product.find(queryCommand)
     .sort({ createdAt: -1 })
     .skip(offset)
@@ -119,10 +122,10 @@ productController.getAllProducts = catchAsync(async (req, res, next) => {
 
 productController.getSingleProduct = catchAsync(async (req, res, next) => {
   // Get data from request
-  const currentUserId = req.userId;
+  // const currentUserId = req.userId;
   const pId = req.params.id;
   // Process
-  let product = await Product.findById(pId);
+  let product = await Product.findById(pId).populate("category", "name");
   if (!product)
     throw new AppError(400, "Product Not Found", "Get Single Product Error");
 
