@@ -59,7 +59,7 @@ productController.getAllProducts = catchAsync(async (req, res, next) => {
     category = queries?.category;
     console.log("category", category);
     const productCat = await productCategory.find({ name: category });
-    // category = productCat[0]._id;
+    category = productCat[0]._id;
     queries.category = category;
     // console.log("queries.category", queries.category);
     formatedQueries.category = category;
