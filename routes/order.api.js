@@ -15,12 +15,18 @@ const { param } = require("express-validator");
 router.post("/", authentication.loginRequired, orderController.createOrder);
 
 /**
- * @rout GET /order
- * @description Get user's oders
- * @access Login required
+ * @rout PUT /order/status/:oId
+ * @description Update category
+ * @access Login required, Admin
  */
 
-router.get("/", authentication.loginRequired, orderController.getUserOrder);
+router.put(
+  "status/:oId",
+  authentication.loginRequired,
+  authentication.isAdmin,
+  validators.validate([param("oId").exists().custom(validators.checkObjectId)]),
+  orderController.updateStatusOrder
+);
 
 /**
  * @rout GET /order/admin
@@ -36,17 +42,11 @@ router.get(
 );
 
 /**
- * @rout PUT /order/status/:oId
- * @description Update category
- * @access Login required, Admin
+ * @rout GET /order
+ * @description Get user's oders
+ * @access Login required
  */
 
-router.put(
-  "status/:oId",
-  authentication.loginRequired,
-  authentication.isAdmin,
-  validators.validate([param("oId").exists().custom(validators.checkObjectId)]),
-  orderController.updateStatusOrder
-);
+router.get("/", authentication.loginRequired, orderController.getUserOrder);
 
 module.exports = router;

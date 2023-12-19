@@ -108,10 +108,9 @@ router.get(
 /**
  * @rout PUT /users/cart
  * @description Update cart
- * @access Login required
  */
 
-router.put("/cart", userController.updateCart);
+router.put("/cart", authentication.loginRequired, userController.updateCart);
 
 /**
  * @rout DELETE /users/remove-cart
@@ -123,6 +122,19 @@ router.delete(
   "/remove-cart/:pid",
   authentication.loginRequired,
   userController.removeProductInCart
+);
+/**
+ * @rout PUT /users/wishlist/:pid
+ * @description Update wishlist
+ * @access Login required
+ */
+router.put(
+  "/wishlist/:pid",
+  authentication.loginRequired,
+  validators.validate([
+    param("pid", "Invalid productId").exists().custom(validators.checkObjectId),
+  ]),
+  userController.updateWishlist
 );
 
 /**

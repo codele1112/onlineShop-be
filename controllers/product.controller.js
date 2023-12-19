@@ -56,8 +56,10 @@ productController.getAllProducts = catchAsync(async (req, res, next) => {
     formatedQueries.name = { $regex: queries.name, $options: "i" };
 
   if (queries?.category) {
-    const productCat = await productCategory.find({ name: queries?.category });
-    category = productCat[0]._id;
+    category = queries?.category;
+    console.log("category", category);
+    const productCat = await productCategory.find({ name: category });
+    // category = productCat[0]._id;
     queries.category = category;
     // console.log("queries.category", queries.category);
     formatedQueries.category = category;
@@ -77,7 +79,7 @@ productController.getAllProducts = catchAsync(async (req, res, next) => {
       ],
     };
   }
-  console.log("formatedQueries", formatedQueries, queryObject);
+  // console.log("formatedQueries", formatedQueries, queryObject);
 
   const q = { ...formatedQueries, ...queryObject };
   let queryCommand = Product.find(q);

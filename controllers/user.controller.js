@@ -140,16 +140,18 @@ userController.getAllUsers = catchAsync(async (req, res, next) => {
 
 userController.getCurrentUser = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
-
+  // console.log(_id);
   const user = await User.findById(_id)
-    .select("-refreshToken -password")
+    .select("-refreshToken -password  -passwordChangedAt")
     .populate({
       path: "cart",
       populate: {
         path: "product",
-        select: "name images price",
+        select: "name thumb images price",
       },
-    });
+    })
+    .populate("wishlist", "name thumb images price");
+
   if (!user)
     throw new AppError(401, "User Not Found", "Get Current User Error!");
 
@@ -219,34 +221,44 @@ userController.getSingleUser = catchAsync(async (req, res, next) => {
 });
 
 userController.updateCart = catchAsync(async (req, res, next) => {
-  // get data
+  // console.log("decode", decode);
   const { _id } = req.user;
   const { pid, quantity } = req.body;
 
-  console.log({ pid, quantity });
-  // process
+  // console.log({ pid, quantity });
   const user = await User.findById(_id);
-  console.log("user", user);
-
+  // console.log("user", user);
   if (!user) throw new AppError(400, "User Not Found", "Update Cart Error");
+
   const alreadyProduct = user?.cart?.find(
     (el) => el.product._id.toString() === pid
   );
   const product = await Product.findById(pid);
+
+  // console.log("product", product);
+
+  // product = product.name;
+
   if (!product)
     throw new AppError(400, "Product not found", "Update Cart Error");
-  const { price } = product;
-  console.log("alreadyProduct", alreadyProduct);
+  const { price, name } = product;
+  // console.log("alreadyProduct", alreadyProduct);
 
   if (alreadyProduct) {
     const response = await User.updateOne(
       { cart: { $elemMatch: alreadyProduct } },
-      { $set: { "cart.$.quantity": quantity, "cart.$.price": price } },
+      {
+        $set: {
+          "cart.$.name": name,
+          "cart.$.quantity": quantity,
+          "cart.$.price": price,
+        },
+      },
       { new: true }
     );
 
     const newCart = (await User.findById(_id).select("cart")).cart;
-    console.log("newCart", newCart);
+    // console.log("newCart", newCart);
     return sendResponse(
       res,
       200,
@@ -259,7 +271,7 @@ userController.updateCart = catchAsync(async (req, res, next) => {
     const response = await User.findByIdAndUpdate(
       _id,
       {
-        $push: { cart: { product: pid, quantity, price } },
+        $push: { cart: { product: pid, quantity, price, name } },
       },
       { new: true }
     );
@@ -352,6 +364,7 @@ userController.updateUserByAdmin = catchAsync(async (req, res, next) => {
 
   return sendResponse(res, 200, true, user, null, "Updated");
 });
+
 userController.deleteUser = catchAsync(async (req, res, next) => {
   const { uid } = req.params;
   // console.log("uid", uid);
@@ -359,6 +372,42 @@ userController.deleteUser = catchAsync(async (req, res, next) => {
   let user = await User.findByIdAndDelete(uid);
 
   return sendResponse(res, 200, true, user, null, "Deleted user Successfully!");
+});
+
+userController.updateWishlist = catchAsync(async (req, res, next) => {
+  const { pid } = req.params;
+  const { _id } = req.user;
+  const user = await User.findById(_id);
+  const alreadyPid = user.wishlist?.find((el) => el.toString() === pid);
+  if (alreadyPid) {
+    const wishlist = await User.findByIdAndUpdate(
+      _id,
+      { $pull: { wishlist: pid } },
+      { new: true }
+    );
+    return sendResponse(
+      res,
+      200,
+      true,
+      wishlist,
+      null,
+      "Updated wishlist Successfully"
+    );
+  } else {
+    const wishlist = await User.findByIdAndUpdate(
+      _id,
+      { $push: { wishlist: pid } },
+      { new: true }
+    );
+    return sendResponse(
+      res,
+      200,
+      true,
+      wishlist,
+      null,
+      "Updated wishlist Successfully"
+    );
+  }
 });
 
 module.exports = userController;

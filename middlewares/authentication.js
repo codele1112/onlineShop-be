@@ -19,7 +19,7 @@ authentication.loginRequired = (req, res, next) => {
           throw new AppError(401, "Token is invalid", "Authentication Error");
         }
       }
-      console.log("decode", decode);
+      // console.log("decode", decode);
 
       req.user = decode;
 

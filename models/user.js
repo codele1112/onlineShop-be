@@ -27,11 +27,13 @@ const userSchema = Schema(
     },
     phone: { type: String, default: "" },
     address: String,
-    wishlist: { type: mongoose.Types.ObjectId, ref: "Product" },
+    wishlist: [{ type: mongoose.Types.ObjectId, ref: "Product" }],
     cart: [
       {
         product: { type: mongoose.Types.ObjectId, ref: "Product" },
+        name: String,
         quantity: Number,
+        thumbnail: String,
         price: Number,
       },
     ],
