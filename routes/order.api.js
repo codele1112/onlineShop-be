@@ -5,6 +5,19 @@ const orderController = require("../controllers/order.controller");
 const authentication = require("../middlewares/authentication");
 const validators = require("../middlewares/validators");
 const { param } = require("express-validator");
+
+/**
+ * @rout GET /order-stat
+ * @description Get orders stats
+ * @access Admin login required
+ */
+
+router.get(
+  "/order-stat",
+  authentication.loginRequired,
+  authentication.isAdmin,
+  orderController.getOrderStats
+);
 /**
  * @rout POST /order
  * @description create an order

@@ -1,11 +1,13 @@
 const { catchAsync, AppError, sendResponse } = require("../helpers/utils");
 const User = require("../models/user");
 const Order = require("../models/order");
+const moment = require("moment");
 
 const orderController = {};
 orderController.createOrder = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
-  const { products, total, address, status } = req.body;
+  const { products, total, address, status, createdAt } = req.body;
+  // console.log("products", products);
 
   if (address) {
     await User.findByIdAndUpdate(
@@ -15,7 +17,7 @@ orderController.createOrder = catchAsync(async (req, res, next) => {
     );
   }
 
-  const data = { products, total, orderBy: _id };
+  const data = { products, total, orderBy: _id, createdAt };
   if (status) data.status = status;
   const order = await Order.create(data);
   return sendResponse(res, 200, true, order, null, "Create order Successful");
@@ -76,7 +78,6 @@ orderController.getUserOrder = catchAsync(async (req, res, next) => {
 });
 
 orderController.getOrders = catchAsync(async (req, res, next) => {
-  // const currentUserId = req.userId;
   const order = await Order.find();
   return sendResponse(res, 200, true, order, null, "Get all orders Successful");
 });
@@ -99,5 +100,31 @@ orderController.updateStatusOrder = catchAsync(async (req, res, next) => {
 });
 
 orderController.deleteOrder = catchAsync(async (req, res, next) => {});
+
+orderController.getOrderStats = catchAsync(async (req, res, next) => {
+  try {
+    const orders = await Order.aggregate([
+      {
+        $match: { createdAt: { $lte: new Date() } },
+      },
+      {
+        $project: {
+          month: { $month: "$createdAt" },
+          sales: "$total",
+        },
+      },
+      {
+        $group: {
+          _id: "$month",
+          totalOrders: { $sum: 1 },
+          income: { $sum: "$sales" },
+        },
+      },
+    ]);
+    sendResponse(res, 200, true, orders, null, "Get orders stats successfully");
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = orderController;

@@ -26,6 +26,18 @@ router.post(
   ]),
   userController.register
 );
+/**
+ * @rout GET /user-stat
+ * @description Get users stats
+ * @access Admin login required
+ */
+
+router.get(
+  "/user-stat",
+  authentication.loginRequired,
+  authentication.isAdmin,
+  userController.getUserStats
+);
 
 /**
  * @rout GET /users/final-registration

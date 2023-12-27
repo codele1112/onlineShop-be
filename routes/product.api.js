@@ -26,7 +26,6 @@ router.post(
     { name: "images", maxCount: 10 },
     { name: "thumb", maxCount: 1 },
   ]),
-
   authentication.loginRequired,
   authentication.isAdmin,
   productController.createNewProduct
@@ -85,9 +84,13 @@ router.put(
  */
 router.put(
   "/:pid",
-  // authentication.loginRequired,
-  // authentication.isAdmin,
+  authentication.loginRequired,
+  authentication.isAdmin,
   validators.validate([param("pid").exists().custom(validators.checkObjectId)]),
+  uploader.fields([
+    { name: "images", maxCount: 10 },
+    { name: "thumb", maxCount: 1 },
+  ]),
   productController.updateProduct
 );
 

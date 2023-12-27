@@ -22,7 +22,7 @@ const orderShema = Schema(
     total: Number,
     orderBy: { type: mongoose.Types.ObjectId, ref: "User" },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 
 const Order = mongoose.model("Order", orderShema);

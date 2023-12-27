@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const generateAccessToken = require("../middlewares/jwt");
 const sendMail = require("../helpers/sendMail");
 var uniqid = require("uniqid");
+const moment = require("moment");
 
 const userController = {};
 
@@ -140,7 +141,6 @@ userController.getAllUsers = catchAsync(async (req, res, next) => {
 
 userController.getCurrentUser = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
-  // console.log(_id);
   const user = await User.findById(_id)
     .select("-refreshToken -password  -passwordChangedAt")
     .populate({
@@ -410,4 +410,28 @@ userController.updateWishlist = catchAsync(async (req, res, next) => {
   }
 });
 
+//
+userController.getUserStats = catchAsync(async (req, res, next) => {
+  try {
+    const users = await User.aggregate([
+      {
+        $match: { createdAt: { $lte: new Date() } },
+      },
+      {
+        $project: {
+          month: { $month: "$createdAt" },
+        },
+      },
+      {
+        $group: {
+          _id: "$month",
+          total: { $sum: 1 },
+        },
+      },
+    ]);
+    sendResponse(res, 200, true, users, null, "Get user stats success");
+  } catch (error) {
+    next(error);
+  }
+});
 module.exports = userController;
