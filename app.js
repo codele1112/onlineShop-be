@@ -6,13 +6,11 @@ var logger = require("morgan");
 const cors = require("cors");
 const { sendResponse } = require("./helpers/utils");
 
-const db = require("./config/db");
-
 var indexRouter = require("./routes/index");
+const db = require("./config/db");
 
 var app = express();
 // connect to db
-db.connect();
 
 app.use(logger("dev"));
 app.use(cookieParser());
@@ -53,5 +51,6 @@ app.use((err, req, res, next) => {
     );
   }
 });
+db.connect();
 
 module.exports = app;
