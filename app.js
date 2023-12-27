@@ -29,6 +29,8 @@ app.use((req, res, next) => {
   next();
 });
 
+console.log("env", process.env.CLOUDINARY_URL);
+
 app.use((err, req, res, next) => {
   console.log("ERROR", err);
   if (err.isOperational) {
