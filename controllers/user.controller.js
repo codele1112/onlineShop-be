@@ -46,8 +46,6 @@ userController.register = catchAsync(async (req, res, next) => {
     null,
     "Please check your email to active account."
   );
-
-  // sendResponse(res, 200, true, { newUser }, null, "Create user Successful");
 });
 
 userController.finalRegister = catchAsync(async (req, res, next) => {
@@ -221,13 +219,10 @@ userController.getSingleUser = catchAsync(async (req, res, next) => {
 });
 
 userController.updateCart = catchAsync(async (req, res, next) => {
-  // console.log("decode", decode);
   const { _id } = req.user;
   const { pid, quantity } = req.body;
 
-  // console.log({ pid, quantity });
   const user = await User.findById(_id);
-  // console.log("user", user);
   if (!user) throw new AppError(400, "User Not Found", "Update Cart Error");
 
   const alreadyProduct = user?.cart?.find(
@@ -235,14 +230,9 @@ userController.updateCart = catchAsync(async (req, res, next) => {
   );
   const product = await Product.findById(pid);
 
-  // console.log("product", product);
-
-  // product = product.name;
-
   if (!product)
     throw new AppError(400, "Product not found", "Update Cart Error");
   const { price, name } = product;
-  // console.log("alreadyProduct", alreadyProduct);
 
   if (alreadyProduct) {
     const response = await User.updateOne(
@@ -258,7 +248,6 @@ userController.updateCart = catchAsync(async (req, res, next) => {
     );
 
     const newCart = (await User.findById(_id).select("cart")).cart;
-    // console.log("newCart", newCart);
     return sendResponse(
       res,
       200,
@@ -410,7 +399,6 @@ userController.updateWishlist = catchAsync(async (req, res, next) => {
   }
 });
 
-//
 userController.getUserStats = catchAsync(async (req, res, next) => {
   try {
     const users = await User.aggregate([

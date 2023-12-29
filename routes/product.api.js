@@ -45,9 +45,9 @@ router.get("/", productController.getAllProducts);
  * @access Public
  */
 router.get(
-  "/:id",
+  "/:pid",
   validators.validate([
-    param("id").exists().isString().custom(validators.checkObjectId),
+    param("pid").exists().isString().custom(validators.checkObjectId),
   ]),
   productController.getSingleProduct
 );

@@ -22,14 +22,6 @@ router.use("/products", productApi);
 const categoryApi = require("./productCategory.api");
 router.use("/productcategories", categoryApi);
 
-// blogCategoryApi
-const blogCategoryApi = require("./blogCategory.api");
-router.use("/blogcategories", blogCategoryApi);
-
-// blogApi
-const blogApi = require("./blog.api");
-router.use("/blogs", blogApi);
-
 // couponApi
 const couponApi = require("./coupon.api");
 router.use("/coupon", couponApi);

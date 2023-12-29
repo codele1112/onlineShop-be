@@ -27,7 +27,7 @@ router.post(
   userController.register
 );
 /**
- * @rout GET /user-stat
+ * @rout GET /users/user-stat
  * @description Get users stats
  * @access Admin login required
  */
@@ -41,7 +41,7 @@ router.get(
 
 /**
  * @rout GET /users/final-registration
- * @description final register a new account
+ * @description final registration a new account
  * @access Public
  */
 
@@ -57,7 +57,6 @@ router.get(
   "/",
   authentication.loginRequired,
   authentication.isAdmin,
-
   userController.getAllUsers
 );
 

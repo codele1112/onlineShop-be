@@ -26,22 +26,11 @@ router.post(
 
 /**
  * @rout POST /auth/logout
- * @description Login with username and password.
- * @body (email, password)
+ * @description Logout account.
  * @access Public
  */
 
-router.get(
-  "/logout",
-  validators.validate([
-    body("email", "Invalid email")
-      .exists()
-      .isEmail()
-      .normalizeEmail({ gmail_remove_dots: false }),
-    body("password", "Invalid password").exists().notEmpty(),
-  ]),
-  authController.logout
-);
+router.get("/logout", authController.logout);
 
 /**
  * @rout POST /auth/forgotpassword
@@ -53,7 +42,7 @@ router.post("/forgot-password", authController.forgotPassword);
 
 /**
  * @rout PUT /auth/resetpassword
- * @description Login with username and password.
+ * @description Reset password.
  * @body (email, password)
  * @access Public
  */
