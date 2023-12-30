@@ -53,7 +53,6 @@ couponController.updateCoupon = catchAsync(async (req, res, next) => {
 
 couponController.deleteCoupon = catchAsync(async (req, res, next) => {
   const { cid } = req.params;
-
   const coupon = await Coupon.findByIdAndDelete(cid);
 
   return sendResponse(

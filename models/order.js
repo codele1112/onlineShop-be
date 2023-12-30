@@ -9,9 +9,10 @@ const orderShema = Schema(
           type: mongoose.Schema.ObjectId,
           ref: "Product",
         },
-        quantity: Number,
-        price: Number,
         name: String,
+        quantity: Number,
+        thumbnail: String,
+        price: Number,
       },
     ],
     status: {
@@ -20,6 +21,8 @@ const orderShema = Schema(
       enum: ["Cancelled", "Succeed"],
     },
     total: Number,
+
+    counpon: { type: mongoose.Types.ObjectId, ref: "Counpon" },
     orderBy: { type: mongoose.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }

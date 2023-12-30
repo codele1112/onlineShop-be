@@ -35,6 +35,8 @@ const userSchema = Schema(
         quantity: Number,
         thumbnail: String,
         price: Number,
+        sold: Number,
+        stock: Number,
       },
     ],
     isBlocked: { type: Boolean, default: false },

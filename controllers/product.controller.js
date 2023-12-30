@@ -7,7 +7,7 @@ const productCategory = require("../models/productCategory");
 const productController = {};
 
 productController.createNewProduct = catchAsync(async (req, res, next) => {
-  let { name, description, category, price, quantity } = req.body;
+  let { name, description, category, price, stock } = req.body;
   const productCat = await productCategory.find({ name: category });
   category = productCat[0]._id;
   req.body.category = category;
@@ -122,7 +122,7 @@ productController.getSingleProduct = catchAsync(async (req, res, next) => {
 });
 
 productController.updateProduct = catchAsync(async (req, res, next) => {
-  let { name, description, category, price, quantity } = req.body;
+  let { name, description, category, price, stock } = req.body;
   const { pid } = req.params;
   const files = req?.files;
   const productCat = await productCategory.find({ name: category });
@@ -166,13 +166,13 @@ productController.deleteProduct = catchAsync(async (req, res, next) => {
 });
 
 productController.ratingProduct = catchAsync(async (req, res, next) => {
-  const currentUserId = req.userId;
-  const { star, comment, pId } = req.body;
+  const { star, comment, pid } = req.body;
+  const { _id } = req.user;
   console.log(req.body);
-  if (!star || !pId) throw new AppError(400, "Missing inputs", "Rating Error");
-  const ratingProduct = await Product.findById(pId);
+  if (!star || !pid) throw new AppError(400, "Missing inputs", "Rating Error");
+  const ratingProduct = await Product.findById(pid);
   const alreadyRating = ratingProduct?.ratings?.find(
-    (el) => el.postedBy.toString() === currentUserId
+    (el) => el.postedBy.toString() === _id
   );
   if (alreadyRating) {
     // update star & comment
@@ -186,10 +186,10 @@ productController.ratingProduct = catchAsync(async (req, res, next) => {
   } else {
     // add star & comment
     const product = await Product.findByIdAndUpdate(
-      productId,
+      pid,
       {
         $push: {
-          ratings: { star, comment, postedBy: currentUserId },
+          ratings: { star, comment, postedBy: _id },
         },
       },
       { new: true }
@@ -199,7 +199,7 @@ productController.ratingProduct = catchAsync(async (req, res, next) => {
   }
 
   // total Ratings
-  const updatedProduct = await Product.findById(pId);
+  const updatedProduct = await Product.findById(pid);
   const ratingCount = updatedProduct.ratings.length;
   const sumRatings = updatedProduct.ratings.reduce(
     (sum, el) => sum + +el.star,

@@ -21,5 +21,5 @@ const couponSchema = Schema(
   { timestamps: true }
 );
 
-const couponCategory = mongoose.model("couponCategory", couponSchema);
-module.exports = couponCategory;
+const Coupon = mongoose.model("coupon", couponSchema);
+module.exports = Coupon;

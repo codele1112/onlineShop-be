@@ -1,13 +1,13 @@
 const { catchAsync, AppError, sendResponse } = require("../helpers/utils");
 const User = require("../models/user");
 const Order = require("../models/order");
-const moment = require("moment");
+const Product = require("../models/product");
 
 const orderController = {};
 orderController.createOrder = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
-  const { products, total, address, status, createdAt } = req.body;
-  // console.log("products", products);
+
+  const { products, address, total, status, createdAt } = req.body;
 
   if (address) {
     await User.findByIdAndUpdate(
@@ -20,7 +20,8 @@ orderController.createOrder = catchAsync(async (req, res, next) => {
   const data = { products, total, orderBy: _id, createdAt };
   if (status) data.status = status;
   const order = await Order.create(data);
-  return sendResponse(res, 200, true, order, null, "Create order Successful");
+
+  return sendResponse(res, 200, true, order, null, "Create order Successfully");
 });
 
 orderController.getUserOrder = catchAsync(async (req, res, next) => {
@@ -73,13 +74,20 @@ orderController.getUserOrder = catchAsync(async (req, res, next) => {
     true,
     { orders, count, totalPages },
     null,
-    "Get user's orders Successful"
+    "Get user's orders Successfully"
   );
 });
 
 orderController.getOrders = catchAsync(async (req, res, next) => {
   const order = await Order.find();
-  return sendResponse(res, 200, true, order, null, "Get all orders Successful");
+  return sendResponse(
+    res,
+    200,
+    true,
+    order,
+    null,
+    "Get all orders Successfully"
+  );
 });
 
 orderController.updateStatusOrder = catchAsync(async (req, res, next) => {
@@ -95,11 +103,11 @@ orderController.updateStatusOrder = catchAsync(async (req, res, next) => {
     true,
     order,
     null,
-    "Update status order Successful"
+    "Update status order Successfully"
   );
 });
 
-orderController.deleteOrder = catchAsync(async (req, res, next) => {});
+// orderController.deleteOrder = catchAsync(async (req, res, next) => {});
 
 orderController.getOrderStats = catchAsync(async (req, res, next) => {
   try {

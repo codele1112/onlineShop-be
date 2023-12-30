@@ -12,6 +12,7 @@ const userController = {};
 
 userController.register = catchAsync(async (req, res, next) => {
   let { name, email, password, role, phone } = req.body;
+  console.log({ name, email, password, role, phone });
   let user = await User.findOne({ email });
   if (user)
     throw new AppError(400, "User already existed!", "Registration error");
@@ -220,19 +221,20 @@ userController.getSingleUser = catchAsync(async (req, res, next) => {
 
 userController.updateCart = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
-  const { pid, quantity } = req.body;
+  const { pid, quantity = 1 } = req.body;
 
   const user = await User.findById(_id);
   if (!user) throw new AppError(400, "User Not Found", "Update Cart Error");
 
-  const alreadyProduct = user?.cart?.find(
-    (el) => el.product._id.toString() === pid
-  );
   const product = await Product.findById(pid);
 
   if (!product)
     throw new AppError(400, "Product not found", "Update Cart Error");
-  const { price, name } = product;
+  const { price, name, sold, stock } = product;
+
+  const alreadyProduct = user?.cart?.find(
+    (el) => el.product._id.toString() === pid
+  );
 
   if (alreadyProduct) {
     const response = await User.updateOne(
@@ -241,13 +243,16 @@ userController.updateCart = catchAsync(async (req, res, next) => {
         $set: {
           "cart.$.name": name,
           "cart.$.quantity": quantity,
+          "cart.$.stock": +stock - +quantity,
           "cart.$.price": price,
+          "cart.$.sold": sold + quantity,
         },
       },
       { new: true }
     );
 
     const newCart = (await User.findById(_id).select("cart")).cart;
+
     return sendResponse(
       res,
       200,
@@ -260,7 +265,16 @@ userController.updateCart = catchAsync(async (req, res, next) => {
     const response = await User.findByIdAndUpdate(
       _id,
       {
-        $push: { cart: { product: pid, quantity, price, name } },
+        $push: {
+          cart: {
+            product: pid,
+            quantity,
+            stock: +stock - +quantity,
+            sold: +sold + +quantity,
+            price,
+            name,
+          },
+        },
       },
       { new: true }
     );

@@ -29,7 +29,7 @@ const productSchema = Schema(
       type: mongoose.Types.ObjectId,
       ref: "productCategory",
     },
-    quantity: {
+    stock: {
       type: Number,
       default: 0,
     },
