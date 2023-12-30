@@ -225,10 +225,10 @@ userController.updateCart = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
   const { pid, quantity = 1 } = req.body;
 
-  const user = await User.findById(_id);
+  let user = await User.findById(_id).select("cart");
   if (!user) throw new AppError(400, "User Not Found", "Update Cart Error");
 
-  const product = await Product.findById(pid);
+  let product = await Product.findById(pid);
 
   if (!product)
     throw new AppError(400, "Product not found", "Update Cart Error");
@@ -253,14 +253,22 @@ userController.updateCart = catchAsync(async (req, res, next) => {
       { new: true }
     );
 
-    const newCart = (await User.findById(_id).select("cart")).cart;
-    await newCart.save();
+    await user.save();
 
+    product = await Product.findByIdAndUpdate(
+      pid,
+      {
+        stock: +stock - +quantity,
+        sold: sold + quantity,
+      },
+      { new: true }
+    );
+    await product.save();
     return sendResponse(
       res,
       200,
       true,
-      newCart,
+      { user, product },
       null,
       "Updated Cart Successfully"
     );
@@ -281,14 +289,25 @@ userController.updateCart = catchAsync(async (req, res, next) => {
       },
       { new: true }
     );
-    const newCart = (await User.findById(_id).select("cart")).cart;
-    await newCart.save();
+    await user.save();
+
+    product = await Product.findByIdAndUpdate(
+      pid,
+      {
+        stock: +stock - +quantity,
+
+        sold: sold + quantity,
+      },
+
+      { new: true }
+    );
+    await product.save();
 
     return sendResponse(
       res,
       200,
       true,
-      newCart,
+      { user, product },
       null,
       "Updated Cart Successfully"
     );
