@@ -30,12 +30,14 @@ userController.register = catchAsync(async (req, res, next) => {
 
   const html = `Please confirm your email address by clicking the link below to complete the registration.
   This link will expire within 5 minutes from now. 
-  <a href=${process.env.URL_SERVER}/api/users/final-registration/${token}>Click here!</a>`;
+  <a href=${process.env.URL_SERVER}/api/users/final-registration/${
+    token + " " + email
+  }>Click here!</a>`;
 
   const data = {
     email,
     html,
-    subject: "REGISTRATION COMPLETED",
+    subject: "REGISTRATION COMPLETTED",
   };
 
   const rs = await sendMail(data);
@@ -252,6 +254,7 @@ userController.updateCart = catchAsync(async (req, res, next) => {
     );
 
     const newCart = (await User.findById(_id).select("cart")).cart;
+    await newCart.save();
 
     return sendResponse(
       res,
@@ -279,6 +282,8 @@ userController.updateCart = catchAsync(async (req, res, next) => {
       { new: true }
     );
     const newCart = (await User.findById(_id).select("cart")).cart;
+    await newCart.save();
+
     return sendResponse(
       res,
       200,

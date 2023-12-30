@@ -16,6 +16,12 @@ const authController = {};
 authController.loginWithEmail = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   const response = await User.findOne({ email });
+  if (!response)
+    throw new AppError(
+      401,
+      "Wrong email or password!Please try again.",
+      "Login Error"
+    );
   if (response && (await response.isCorrectPassword(password))) {
     const { password, role, ...userData } = response.toObject();
     // create tokens
