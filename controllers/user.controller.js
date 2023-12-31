@@ -11,44 +11,54 @@ const moment = require("moment");
 const userController = {};
 
 userController.register = catchAsync(async (req, res, next) => {
-  let { name, email, password, role, phone } = req.body;
-  console.log({ name, email, password, role, phone });
+  let { name, email, password, phone } = req.body;
   let user = await User.findOne({ email });
-  if (user)
+  if (user) {
     throw new AppError(400, "User already existed!", "Registration error");
-
-  const token = uniqid();
-
-  res.cookie(
-    "dataRegister",
-    { ...req.body, token },
-    {
-      httpOnly: true,
-      maxAge: 5 * 60 * 1000,
+  } else {
+    const token = uniqid();
+    const newUser = await User.create({
+      email: btoa(email) + "@" + token,
+      password,
+      name,
+      phone,
+    });
+    if (newUser) {
+      const html = `<h2>Register Code: </h2><br/><blockquote>${token}</blockquote> `;
+      await sendMail({ email, html, subject: "CONFIRM REGISTRATION" });
     }
-  );
+    return sendResponse(
+      res,
+      200,
+      true,
+      newUser,
+      null,
+      "Please check your email to active account."
+    );
+  }
 
-  const html = `Please confirm your email address by clicking the link below to complete the registration.
-  This link will expire within 5 minutes from now. 
-  <a href=${process.env.URL_SERVER}/api/users/final-registration/${
-    token + " " + email
-  }>Click here!</a>`;
+  // res.cookie(
+  //   "dataRegister",
+  //   { ...req.body, token },
+  //   {
+  //     httpOnly: true,
+  //     maxAge: 5 * 60 * 1000,
+  //   }
+  // );
 
-  const data = {
-    email,
-    html,
-    subject: "REGISTRATION COMPLETTED",
-  };
+  // const html = `Please confirm your email address by clicking the link below to complete the registration.
+  // This link will expire within 5 minutes from now.
+  // <a href=${process.env.URL_SERVER}/api/users/final-registration/${
+  //   token + " " + email
+  // }>Click here!</a>`;
 
-  const rs = await sendMail(data);
-  return sendResponse(
-    res,
-    200,
-    true,
-    rs,
-    null,
-    "Please check your email to active account."
-  );
+  // const data = {
+  //   email,
+  //   html,
+  //   subject: "REGISTRATION COMPLETTED",
+  // };
+
+  // const rs = await sendMail(data);
 });
 
 userController.finalRegister = catchAsync(async (req, res, next) => {
