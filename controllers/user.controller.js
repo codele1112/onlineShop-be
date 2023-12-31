@@ -46,12 +46,15 @@ userController.register = catchAsync(async (req, res, next) => {
 userController.finalRegister = catchAsync(async (req, res, next) => {
   const { token } = req.params;
 
-  const notActivedEmail = await User.find({ email: new RegExp(`${token}$`) });
+  const notActivedEmail = await User.findOne({
+    email: new RegExp(`${token}$`),
+  });
 
   if (notActivedEmail) {
-    notActivedEmail.email = atob(notActivedEmail.email.split("@")[0]);
+    notActivedEmail.email = atob(notActivedEmail?.email?.split("@")[0]);
     notActivedEmail.save();
-  }
+  } else throw AppError(401, "Something went wrong", "Register Error");
+
   return sendResponse(res, 200, true, notActivedEmail, "Register Successfully");
 });
 
