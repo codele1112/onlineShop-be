@@ -45,7 +45,7 @@ router.get(
  * @access Public
  */
 
-router.get("/final-registration/:token", userController.finalRegister);
+router.put("/final-registration/:token", userController.finalRegister);
 
 /**
  * @rout GET /users

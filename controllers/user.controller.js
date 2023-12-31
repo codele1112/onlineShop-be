@@ -17,8 +17,9 @@ userController.register = catchAsync(async (req, res, next) => {
     throw new AppError(400, "User already existed!", "Registration error");
   } else {
     const token = uniqid();
+    const emailEditted = btoa(email) + "@" + token;
     const newUser = await User.create({
-      email: btoa(email) + "@" + token,
+      email: emailEditted,
       password,
       name,
       phone,
@@ -27,6 +28,10 @@ userController.register = catchAsync(async (req, res, next) => {
       const html = `<h2>Register Code: </h2><br/><blockquote>${token}</blockquote> `;
       await sendMail({ email, html, subject: "CONFIRM REGISTRATION" });
     }
+
+    setTimeout(async () => {
+      await User.deleteOne({ email: emailEditted });
+    }, [300000]);
     return sendResponse(
       res,
       200,
@@ -36,52 +41,18 @@ userController.register = catchAsync(async (req, res, next) => {
       "Please check your email to active account."
     );
   }
-
-  // res.cookie(
-  //   "dataRegister",
-  //   { ...req.body, token },
-  //   {
-  //     httpOnly: true,
-  //     maxAge: 5 * 60 * 1000,
-  //   }
-  // );
-
-  // const html = `Please confirm your email address by clicking the link below to complete the registration.
-  // This link will expire within 5 minutes from now.
-  // <a href=${process.env.URL_SERVER}/api/users/final-registration/${
-  //   token + " " + email
-  // }>Click here!</a>`;
-
-  // const data = {
-  //   email,
-  //   html,
-  //   subject: "REGISTRATION COMPLETTED",
-  // };
-
-  // const rs = await sendMail(data);
 });
 
 userController.finalRegister = catchAsync(async (req, res, next) => {
-  const cookie = req.cookies;
   const { token } = req.params;
-  if (!cookie || cookie?.dataRegister?.token !== token) {
-    res.clearCookie("dataRegister");
-    return res.redirect(`${process.env.CLIENT_URL}/final-registration/failed`);
+
+  const notActivedEmail = await User.find({ email: new RegExp(`${token}$`) });
+
+  if (notActivedEmail) {
+    notActivedEmail.email = atob(notActivedEmail.email.split("@")[0]);
+    notActivedEmail.save();
   }
-
-  const newUser = await User.create({
-    email: cookie?.dataRegister?.email,
-    password: cookie?.dataRegister?.password,
-    name: cookie?.dataRegister?.name,
-    phone: cookie?.dataRegister?.phone,
-  });
-  await newUser.save();
-
-  res.clearCookie("dataRegister");
-  if (newUser) {
-    return res.redirect(`${process.env.CLIENT_URL}/final-registration/success`);
-  } else
-    return res.redirect(`${process.env.CLIENT_URL}/final-registration/failed`);
+  return sendResponse(res, 200, true, notActivedEmail, "Register Successfully");
 });
 
 userController.getAllUsers = catchAsync(async (req, res, next) => {
