@@ -128,7 +128,7 @@ orderController.getOrderStats = catchAsync(async (req, res, next) => {
           income: { $sum: "$sales" },
         },
       },
-    ]);
+    ]).sort({ _id: "$month" });
     sendResponse(res, 200, true, orders, null, "Get orders stats successfully");
   } catch (error) {
     next(error);

@@ -434,7 +434,7 @@ userController.getUserStats = catchAsync(async (req, res, next) => {
           total: { $sum: 1 },
         },
       },
-    ]);
+    ]).sort({ _id: "$month" });
     sendResponse(res, 200, true, users, null, "Get user stats success");
   } catch (error) {
     next(error);
