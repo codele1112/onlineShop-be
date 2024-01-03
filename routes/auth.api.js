@@ -15,11 +15,11 @@ const validators = require("../middlewares/validators");
 router.post(
   "/login",
   validators.validate([
-    body("email", "Invalid email")
+    body("email", "Invalid email.")
       .exists()
       .isEmail()
       .normalizeEmail({ gmail_remove_dots: false }),
-    body("password", "Invalid password").exists().notEmpty(),
+    body("password", "Invalid password.").exists().notEmpty(),
   ]),
   authController.loginWithEmail
 );

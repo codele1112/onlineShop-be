@@ -82,7 +82,7 @@ router.put(
 );
 
 /**
- * @rout PUT /users/:userId
+ * @rout DELETE /users/:uid
  * @description Update user's profile by admin
  * @access Login required
  */
@@ -97,21 +97,21 @@ router.delete(
 );
 /**
  * @rout GET /users/refreshtoken
- * @description
- */
-
-router.post("/refreshtoken", userController.refreshAccessToken);
-/**
- * @rout GET /users/refreshtoken
  * @description Get user profile by ID
  * @access Login required
  */
 
+router.post("/refreshtoken", userController.refreshAccessToken);
+/**
+ * @rout GET /users/:uid
+ * @description Get current user profile
+ * @access Login required
+ */
 router.get(
-  "/:userId",
+  "/:uid",
   authentication.loginRequired,
   validators.validate([
-    param("userId", "Invalid userId").exists().custom(validators.checkObjectId),
+    param("uid", "Invalid userId").exists().custom(validators.checkObjectId),
   ]),
   userController.getSingleUser
 );
@@ -149,7 +149,7 @@ router.put(
 );
 
 /**
- * @rout PUT /users/:userId
+ * @rout PUT /users/:uid
  * @description Update user's profile by admin
  * @access Login required
  */

@@ -10,18 +10,17 @@ const authentication = require("../middlewares/authentication");
 /**
  * @rout POST /products
  * @description create a new product
- * @body { name, description, price, category, quantity, images }
- * @access Private - Admin
+ * @body { name, description, price, category, stock, images }
+ * @access Login required- Admin
  */
 router.post(
   "/",
-  // validators.validate([
-  //   body("name", "Invalid name").exists().notEmpty(),
-  //   body("description", "Invalid description").exists().notEmpty(),
-  //   body("price", "Invalid price").exists().notEmpty(),
-  //   body("category", "Invalid category").exists().notEmpty(),
-  //   body("quantity", "Invalid quantity").exists().notEmpty(),
-  // ]),
+  validators.validate([
+    body("name", "Invalid name").exists().notEmpty(),
+    body("description", "Invalid description").exists().notEmpty(),
+    body("price", "Invalid price").exists().notEmpty(),
+    body("stock", "Invalid stock").exists().notEmpty(),
+  ]),
   uploader.fields([
     { name: "images", maxCount: 10 },
     { name: "thumb", maxCount: 1 },
@@ -39,9 +38,9 @@ router.post(
 router.get("/", productController.getAllProducts);
 
 /**
- * @rout GET /products/:id
+ * @rout GET /products/:pid
  * @description get a single product by ID
- * @query (id)
+ * @query (pid)
  * @access Public
  */
 router.get(
@@ -64,8 +63,7 @@ router.put(
 );
 
 /**
- * @rout PUT /products/uploadimage/:id
- *
+ * @rout PUT /products/uploadimage/:pid
  * @description Upload images for a product by product id
  * @access Login required,Admin
  */
@@ -77,7 +75,7 @@ router.put(
   productController.uploadProductImages
 );
 /**
- * @rout PUT /products/:productId
+ * @rout PUT /products/:pid
  * @description Update a single product by id
  * @body (name, image,description, price, ratings, stock, numberOfReviews)
  * @access Private - Admin

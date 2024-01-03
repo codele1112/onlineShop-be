@@ -15,11 +15,11 @@ const authController = {};
 
 authController.loginWithEmail = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
-  const response = await User.findOne({ email });
+  const response = await User.findOne({ email }, "+password");
   if (!response)
     throw new AppError(
-      401,
-      "Wrong email or password!Please try again.",
+      400,
+      "Wrong email or password! Please try again.",
       "Login Error"
     );
   if (response && (await response.isCorrectPassword(password))) {

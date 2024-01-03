@@ -193,15 +193,11 @@ userController.refreshAccessToken = catchAsync(async (req, res, next) => {
 });
 
 userController.getSingleUser = catchAsync(async (req, res, next) => {
-  // get data
-  const uid = req.params.userId;
-  console.log("uid", uid);
+  const { uid } = req.params;
 
-  // process
   const user = await User.findById(uid);
   if (!user) throw new AppError(400, "User Not Found", "Get Single User Error");
 
-  // // response
   return sendResponse(res, 200, true, user, null, "Get Single User Successful");
 });
 
