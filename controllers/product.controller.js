@@ -122,20 +122,27 @@ productController.getSingleProduct = catchAsync(async (req, res, next) => {
 });
 
 productController.updateProduct = catchAsync(async (req, res, next) => {
-  let { name, description, category, price, stock } = req.body;
   const { pid } = req.params;
   const files = req?.files;
+  let payload = req.body;
+  console.log(payload);
+  let { category } = payload;
+  console.log("category", category);
+
   const productCat = await productCategory.find({ name: category });
-  category = productCat[0]._id;
-  req.body.category = category;
-  if (files?.thumb) req.body.thumb = files?.thumb[0]?.path;
-  if (files?.images) req.body.images = files?.images?.map((el) => el.path);
-  if (req.body && req.body.name) req.body.slug = slugify(req.body.name);
+
+  console.log("productCat", productCat);
+  let id = productCat[0]._id;
+  // gan name trong category thanh id
+  payload.category = id;
+  if (files?.thumb) payload.thumb = files?.thumb[0]?.path;
+  if (files?.images) payload.images = files?.images?.map((el) => el.path);
+  if (payload && payload.name) payload.slug = slugify(payload.name);
   let product = await Product.findById(pid);
   if (!product)
     throw new AppError(400, "Product Not Found", "Update Product Error");
 
-  product = await Product.findByIdAndUpdate(pid, req.body, { new: true });
+  product = await Product.findByIdAndUpdate(pid, payload, { new: true });
   return sendResponse(
     res,
     200,
