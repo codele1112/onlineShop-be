@@ -85,6 +85,7 @@ router.put(
   authentication.loginRequired,
   authentication.isAdmin,
   validators.validate([param("pid").exists().custom(validators.checkObjectId)]),
+  // TODO : can chuyen vao trong api chinh
   uploader.fields([
     { name: "images", maxCount: 10 },
     { name: "thumb", maxCount: 1 },

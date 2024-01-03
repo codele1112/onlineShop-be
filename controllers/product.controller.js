@@ -124,6 +124,7 @@ productController.getSingleProduct = catchAsync(async (req, res, next) => {
 productController.updateProduct = catchAsync(async (req, res, next) => {
   const { pid } = req.params;
   const files = req?.files;
+  console.log("files", files);
   let payload = req.body;
   console.log(payload);
   let { category } = payload;
@@ -135,6 +136,7 @@ productController.updateProduct = catchAsync(async (req, res, next) => {
   let id = productCat[0]._id;
   // gan name trong category thanh id
   payload.category = id;
+  console.log("files.thumb", files.thumb);
   if (files?.thumb) payload.thumb = files?.thumb[0]?.path;
   if (files?.images) payload.images = files?.images?.map((el) => el.path);
   if (payload && payload.name) payload.slug = slugify(payload.name);
