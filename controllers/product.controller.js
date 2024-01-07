@@ -67,7 +67,6 @@ productController.getAllProducts = catchAsync(async (req, res, next) => {
   //Sorting
 
   if (req.query.sort) {
-    console.log("req.query.sort", req.query.sort);
     const sortBy = req.query.sort.split(",").join(" ");
     queryCommand = queryCommand.sort(sortBy);
     // console.log("queryCommand", queryCommand);
@@ -84,12 +83,11 @@ productController.getAllProducts = catchAsync(async (req, res, next) => {
   let page = parseInt(req.query.page) || 1;
   let limit = parseInt(req.query.limit) || 10;
   const count = await Product.find(qr).countDocuments();
-
   const totalPages = Math.ceil(count / limit);
   const offset = limit * (page - 1);
   // console.log("queryCommand", queryCommand);
 
-  let products = await Product.find(qr)
+  let products = await Product.find(queryCommand)
     .sort({ createdAt: -1 })
     .skip(offset)
     .limit(limit)
