@@ -205,6 +205,8 @@ userController.updateCart = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
   const { pid, quantity = 1 } = req.body;
 
+  console.log(pid);
+
   let user = await User.findById(_id).select("cart");
   if (!user) throw new AppError(400, "User Not Found", "Update Cart Error");
 

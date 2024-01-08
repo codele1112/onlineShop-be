@@ -3,16 +3,24 @@ const fs = require("fs");
 const slugify = require("slugify");
 const Product = require("../models/product");
 const productCategory = require("../models/productCategory");
+const cloudinaryUpload = require("../config/cloudinary.config");
 
 const productController = {};
 
 productController.createNewProduct = catchAsync(async (req, res, next) => {
   let { name, description, category, price, stock } = req.body;
+
   const productCat = await productCategory.find({ name: category });
   category = productCat[0]._id;
   req.body.category = category;
+  // console.log(req.files);
+  // console.log(req.body.thumb);
+  // console.log(req.body.images);
+  // const thumb = await cloudinaryUpload(req.body.thumb);
+  // const images = await cloudinaryUpload(req.body.images);
   const thumb = req?.files?.thumb[0].path;
   const images = req?.files?.images.map((el) => el.path);
+  console.log(thumb, images);
   if (thumb) req.body.thumb = thumb;
   if (images) req.body.images = images;
   let product = await Product.findOne({ name });
@@ -122,11 +130,12 @@ productController.getSingleProduct = catchAsync(async (req, res, next) => {
 productController.updateProduct = catchAsync(async (req, res, next) => {
   const { pid } = req.params;
   const files = req?.files;
-  console.log("files", files);
+  // console.log("files", files);
   let payload = req.body;
+
   console.log(payload);
   let { category } = payload;
-  console.log("category", category);
+  // console.log("category", category);
 
   const productCat = await productCategory.find({ name: category });
 
@@ -134,7 +143,7 @@ productController.updateProduct = catchAsync(async (req, res, next) => {
   let id = productCat[0]._id;
   // gan name trong category thanh id
   payload.category = id;
-  console.log("files.thumb", files.thumb);
+  console.log("files", files);
   if (files?.thumb) payload.thumb = files?.thumb[0]?.path;
   if (files?.images) payload.images = files?.images?.map((el) => el.path);
   if (payload && payload.name) payload.slug = slugify(payload.name);

@@ -79,7 +79,7 @@ orderController.getUserOrder = catchAsync(async (req, res, next) => {
 });
 
 orderController.getOrders = catchAsync(async (req, res, next) => {
-  const order = await Order.find();
+  const order = await Order.find().populate("orderBy");
   return sendResponse(
     res,
     200,

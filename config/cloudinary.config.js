@@ -16,6 +16,18 @@ const storage = new CloudinaryStorage({
     folder: "onlineShop_products",
   },
 });
+// const cloudinaryUpload = async (image) => {
+//   if (!image) return "";
+
+//   try {
+//     const res = await cloudinary.uploader.upload(image.path);
+
+//     return res.secure_url;
+//   } catch (error) {
+//     console.log("upload to cloudinary error", error);
+//     throw error;
+//   }
+// };
 
 const uploadCloud = multer({ storage });
 
