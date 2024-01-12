@@ -94,7 +94,7 @@ router.put(
 );
 
 /**
- * @rout DELETE /products/:id
+ * @rout DELETE /products/:pid
  * @description Delete a single product by id
  * @access Private - Admin
  */
